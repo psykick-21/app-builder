@@ -1,0 +1,17 @@
+[
+    {
+        "prompt": "Build a simple task management app. I should be able to create, view, update, and delete tasks. Each task should have a title and a description. Keep the UI very basic."
+    },
+    {
+        "prompt": "I want a small app to track things I need to do daily."
+    },
+    {
+        "prompt": "Create an expense tracking app. Each expense should have an amount, category, date, and optional notes. I only need this for myself, no login or multi-user support."
+    },
+    {
+        "prompt": "Build a lightweight bug tracker for my personal projects. Each bug should have a title, severity, status, and description. I want to see all open bugs first."
+    },
+    {
+        "prompt": "Build a notes app where I can create, edit, and delete notes. Each note should have a title and content."    
+    }
+]

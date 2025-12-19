@@ -1,0 +1,235 @@
+[
+    {
+        "prompt": "Build a simple task management app. I should be able to create, view, update, and delete tasks. Each task should have a title and a description. Keep the UI very basic.",
+        "mode": "CREATE",
+        "intent": {
+            "app_summary": "A simple task management app that supports creating, viewing, updating, and deleting tasks, each with a title and description.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A task with a title and optional description",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application",
+                "The application is intended for a single user and does not require authentication.",
+                "No advanced filtering or sorting features are needed; the UI will display a basic list of tasks and a simple form for CRUD operations."
+            ],
+            "non_goals": []
+        },
+        "change_summary": "Created Task entity with title and description, added CRUD operations, set UI to form_and_list, and recorded basic user assumptions."
+    },
+    {
+        "prompt": "I want a small app to track things I need to do daily.",
+        "mode": "CREATE",
+        "intent": {
+            "app_summary": "A minimal app to record and manage daily tasks.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A task that represents an item to be completed on a given day",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application",
+                "The application is single\u2011user and runs locally.",
+                "Each task is intended for the current day; no explicit due date field is required.",
+                "No advanced filtering or sorting is required beyond basic list view."
+            ],
+            "non_goals": []
+        },
+        "change_summary": "Created Task entity with minimal fields and CRUD operations."
+    },
+    {
+        "prompt": "Create an expense tracking app. Each expense should have an amount, category, date, and optional notes. I only need this for myself, no login or multi-user support.",
+        "mode": "CREATE",
+        "intent": {
+            "app_summary": "A personal expense tracking app with basic CRUD functionality for expenses.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Expense": {
+                    "description": "An expense record that includes an amount, category, date, and optional notes",
+                    "fields": {
+                        "amount": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": true
+                        },
+                        "notes": {
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Expense": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application",
+                "The application is intended for a single user with no authentication or multi\u2011user support",
+                "Data can be stored locally without a centralized backend"
+            ],
+            "non_goals": [
+                "User authentication",
+                "Multi\u2011user or shared data features"
+            ]
+        },
+        "change_summary": "Created an Expense entity with fields, CRUD operations, basic UI expectation, and noted single\u2011user assumptions. No login or multi\u2011user features are included."
+    },
+    {
+        "prompt": "Build a lightweight bug tracker for my personal projects. Each bug should have a title, severity, status, and description. I want to see all open bugs first.",
+        "mode": "CREATE",
+        "intent": {
+            "app_summary": "A lightweight bug tracker for personal projects, listing bugs with their title, severity, status, and description, and showing open bugs first.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Bug": {
+                    "description": "A bug with a title, severity, status, and description.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "severity": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "status": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Bug": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application",
+                "Open bugs are shown before closed bugs in the UI.",
+                "The application is intended for single-user personal use."
+            ],
+            "non_goals": []
+        },
+        "change_summary": "Added Bug entity with required fields, CRUD operations, form_and_list UI, assumptions for ordering and single-user context."
+    },
+    {
+        "prompt": "Build a notes app where I can create, edit, and delete notes. Each note should have a title and content.",
+        "mode": "CREATE",
+        "intent": {
+            "app_summary": "Notes app for creating, editing, and deleting notes",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Note": {
+                    "description": "A note with a title and content",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "content": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Note": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application"
+            ],
+            "non_goals": []
+        },
+        "change_summary": "Initial specification for a simple notes app"
+    }
+]
