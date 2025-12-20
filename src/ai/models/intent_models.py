@@ -52,6 +52,20 @@ class PrimaryEntity(BaseModel):
     fields: Dict[str, EntityField] = Field(
         description="Dictionary of field names to field definitions (must have at least one field)"
     )
+    id_strategy: Literal["auto_increment", "uuid", "user_provided", "natural_key"] = Field(
+        default="auto_increment",
+        description=(
+            "Primary key generation strategy. "
+            "'auto_increment': Database generates sequential IDs (default for most CRUD apps). "
+            "'uuid': System generates UUIDs. "
+            "'user_provided': Client provides IDs (for data imports). "
+            "'natural_key': Use a field like email/username as primary key."
+        )
+    )
+    natural_key_field: Optional[str] = Field(
+        default=None,
+        description="Field name to use as natural key (only if id_strategy is 'natural_key')"
+    )
     
     @field_validator('description')
     @classmethod

@@ -70,6 +70,20 @@ Your sole responsibility is to convert human ambiguity into machine certainty. Y
 - NEVER encode it as an operation or add fields purely for sorting
 - Keep the intent clean and implementation-agnostic
 
+### RULE 6: ID Strategy Normalization
+- For each entity, determine the appropriate `id_strategy`:
+  * **Default: "auto_increment"** - Use this for 95% of CRUD apps (database generates sequential IDs: 1, 2, 3...)
+  * **"uuid"** - Only if user explicitly mentions UUIDs or distributed ID generation
+  * **"user_provided"** - Only if user mentions data import, migration, or wants to control IDs
+  * **"natural_key"** - Only if user explicitly wants email/username/slug as the primary key (also set `natural_key_field`)
+- **NEVER include "id" as a field in the entity's fields dictionary** - it's handled by id_strategy
+- If user mentions "id is required" or "id field", interpret it as id_strategy context, not a field definition
+- Examples:
+  * "Create a task manager" → id_strategy: "auto_increment" (default)
+  * "I need UUIDs for tasks" → id_strategy: "uuid"
+  * "I'm importing existing tasks from another system" → id_strategy: "user_provided"
+  * "Use email as the primary key for users" → id_strategy: "natural_key", natural_key_field: "email"
+
 ## OUTPUT REQUIREMENTS
 - You must output a complete, valid intent specification
 - All entities mentioned must be included in primary_entities (as a DICTIONARY, not a list)
@@ -81,11 +95,14 @@ Your sole responsibility is to convert human ambiguity into machine certainty. Y
       "fields": {{
         "title": {{"type": "string", "required": true}},
         "description": {{"type": "string", "required": false}}
-      }}
+      }},
+      "id_strategy": "auto_increment"
     }}
   }}
   ```
 - All operations must be explicitly listed in the operations field
+- **CRITICAL**: Each entity must have an `id_strategy` field (defaults to "auto_increment" if not specified)
+- **CRITICAL**: DO NOT include "id" as a field in the entity's fields - it's handled by id_strategy
 - UI expectations should reflect the described interaction style:
   * Use "form_and_list" for standard CRUD apps with forms and lists
   * Use "single_page" for simple single-view apps
@@ -114,6 +131,8 @@ Your sole responsibility is to convert human ambiguity into machine certainty. Y
 ✓ operations values are deduplicated CRUD verbs
 ✓ Field types match semantic meaning (integer for amounts, date for dates)
 ✓ User preferences about ordering/filtering captured in assumptions (not as operations)
+✓ Each entity has id_strategy set (defaults to "auto_increment")
+✓ NO "id" field in entity fields dictionary (handled by id_strategy)
 """
 
 
@@ -155,14 +174,25 @@ Your responsibility is to modify the existing intent minimally while preserving 
 - NEVER duplicate verbs in the array (e.g., ["read", "read"] is INVALID)
 - Always deduplicate operations
 
-### RULE 3: Type Semantics Enforcement
-- Choose the correct type based on field semantics:
-  * Amounts/Numbers/Counts → "integer"
-  * Dates/Timestamps → "date"
-  * True/False/Yes/No → "boolean"
-  * Everything else → "string"
-- NEVER default numeric fields to "string"
-- NEVER default date fields to "string"
+### RULE 5: Capture User Preferences Without Encoding Logic
+- If the user mentions ordering, filtering, or priority (e.g., "show open bugs first", "sort by date")
+- Capture it in `assumptions` (e.g., "Open bugs are shown before closed bugs in the UI")
+- NEVER encode it as an operation or add fields purely for sorting
+- Keep the intent clean and implementation-agnostic
+
+### RULE 6: ID Strategy Normalization
+- For each entity, determine the appropriate `id_strategy`:
+  * **Default: "auto_increment"** - Use this for 95% of CRUD apps (database generates sequential IDs: 1, 2, 3...)
+  * **"uuid"** - Only if user explicitly mentions UUIDs or distributed ID generation
+  * **"user_provided"** - Only if user mentions data import, migration, or wants to control IDs
+  * **"natural_key"** - Only if user explicitly wants email/username/slug as the primary key (also set `natural_key_field`)
+- **NEVER include "id" as a field in the entity's fields dictionary** - it's handled by id_strategy
+- If user mentions "id is required" or "id field", interpret it as id_strategy context, not a field definition
+- Examples:
+  * "Create a task manager" → id_strategy: "auto_increment" (default)
+  * "I need UUIDs for tasks" → id_strategy: "uuid"
+  * "I'm importing existing tasks from another system" → id_strategy: "user_provided"
+  * "Use email as the primary key for users" → id_strategy: "natural_key", natural_key_field: "email"
 
 ## OUTPUT REQUIREMENTS
 - You must output a complete, valid intent specification (not a partial update)
@@ -170,6 +200,8 @@ Your responsibility is to modify the existing intent minimally while preserving 
 - All existing fields must be preserved unless explicitly modified
 - The change_summary should clearly describe what was modified
 - Maintain the same schema structure as the original intent
+- **CRITICAL**: Each entity must have an `id_strategy` field (defaults to "auto_increment" if not specified)
+- **CRITICAL**: DO NOT include "id" as a field in the entity's fields - it's handled by id_strategy
 
 ## CONSTRAINTS
 - Do not add features not mentioned in the feedback
@@ -186,6 +218,8 @@ Your responsibility is to modify the existing intent minimally while preserving 
 ✓ operations values are deduplicated CRUD verbs
 ✓ Field types match semantic meaning (integer for amounts, date for dates)
 ✓ User preferences about ordering/filtering captured in assumptions (not as operations)
+✓ Each entity has id_strategy set (defaults to "auto_increment")
+✓ NO "id" field in entity fields dictionary (handled by id_strategy)
 """
 
 

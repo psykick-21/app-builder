@@ -1,6 +1,6 @@
 """Intent Interpreter Agent - translates natural language into structured intent."""
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Literal
 import json
 from dotenv import load_dotenv
 import os
@@ -16,6 +16,8 @@ from ..prompts.intent_interpreter_prompts import (
 )
 from ..graph_states.intent_interpreter_state import IntentInterpreterState
 
+from ..utils.llm_provider import init_llm
+
 load_dotenv()
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL")
@@ -23,21 +25,20 @@ OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL")
 class IntentInterpreterAgent:
     """Agent responsible for creating and evolving structured intent specifications."""
     
-    def __init__(self, model_name: str = "gpt-4o-mini", temperature: float = 0.0):
+    def __init__(
+        self, 
+        provider: Literal["openai", "ollama"],
+        model: str, 
+        additional_kwargs: dict,
+    ):
         """Initialize the Intent Interpreter agent.
         
         Args:
-            model_name: The OpenAI model to use
-            temperature: Temperature for LLM generation (0.0 for deterministic output)
+            provider: The provider to use
+            model: The model to use
+            additional_kwargs: Additional kwargs to pass to the LLM
         """
-        # self.llm = ChatOllama(
-        #     base_url=OLLAMA_BASE_URL,
-        #     model="gpt-oss:20b",
-        # )
-        self.llm = ChatOpenAI(
-            model="gpt-5-mini",
-            reasoning_effort="low",
-        )
+        self.llm = init_llm(provider, model, additional_kwargs)
         
         # Create LLM with structured output for both modes
         self.llm = self.llm.with_structured_output(IntentInterpreterResponse, method="function_calling")
@@ -128,17 +129,3 @@ class IntentInterpreterAgent:
             "mode": response.mode,
             "change_summary": response.change_summary,
         }
-
-
-if __name__ == "__main__":
-    import json
-    from tqdm import tqdm
-    with open("temp/test_data/user_prompts.json", "r") as f:
-        user_prompts = json.load(f)
-    agent = IntentInterpreterAgent()
-    responses = []
-    for prompt in tqdm(user_prompts):
-        response = agent.execute(raw_user_input=prompt["prompt"])
-        responses.append({"prompt": prompt["prompt"], **response.model_dump()})
-    with open("temp/test_data/intent_interpreter_responses.json", "w") as f:
-        json.dump(responses, f, indent=4)

@@ -1,0 +1,3033 @@
+[
+    {
+        "intent": {
+            "app_summary": "A simple task management app to create, view, update, and delete tasks.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A task item with a short title and an optional longer description used to track work to be done.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "UI should be minimal/basic (simple form and list; no advanced styling or interactions)"
+            ],
+            "non_goals": [
+                "No support for recurring tasks, attachments, or collaboration features",
+                "No advanced filtering, sorting, or analytics"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Task",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Task",
+                            "table_name": "tasks",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Task",
+                            "methods": [
+                                {
+                                    "name": "create_task",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "TaskCreate"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Task]"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Task]"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Task",
+                            "functions": [
+                                {
+                                    "name": "create_task",
+                                    "inputs": [
+                                        "TaskCreate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "inputs": [],
+                                    "returns": "List[Task]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/tasks",
+                            "service_call": "TaskService.create_task",
+                            "entity": "Task",
+                            "request_model": "TaskCreate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks",
+                            "service_call": "TaskService.list_tasks",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "List[Task]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.get_task_by_id",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.update_task",
+                            "entity": "Task",
+                            "request_model": "TaskUpdate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.delete_task",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.tasks:router"
+                    ],
+                    "middleware": [
+                        "backend.middleware.error_handler.ErrorHandlerMiddleware"
+                    ]
+                }
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Task",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "title",
+                                        "description"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "title",
+                                        "description"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/tasks/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A small single-user app to track items the user needs to do each day (daily tasks) with simple create/read/update/delete functionality.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A daily task or item the user intends to perform each day, with optional notes and simple completion tracking.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        },
+                        "completed_today": {
+                            "type": "boolean",
+                            "required": false
+                        },
+                        "last_completed": {
+                            "type": "date",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Tasks represent items the user wants to do on a daily basis, but the system does not necessarily enforce complex recurrence rules (recurrence patterns are out of scope for the MVP).",
+                "Completion is tracked at a simple level (completed_today boolean and optional last_completed date) rather than full per-day history unless explicitly requested later."
+            ],
+            "non_goals": [
+                "Multi-user collaboration or user accounts",
+                "Cross-device syncing or offline sync",
+                "Built-in reminders/notifications and advanced recurrence management",
+                "Analytics or reporting dashboards"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Task",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Task",
+                            "table_name": "tasks",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "INTEGER",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Task",
+                            "methods": [
+                                {
+                                    "name": "create_task",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Task"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Task]"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Task]"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Task",
+                            "functions": [
+                                {
+                                    "name": "create_task",
+                                    "inputs": [
+                                        "TaskCreate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Task]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "inputs": [],
+                                    "returns": "List[Task]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/tasks",
+                            "service_call": "TaskService.create_task",
+                            "entity": "Task",
+                            "request_model": "TaskCreate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks",
+                            "service_call": "TaskService.list_tasks",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "List[Task]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.get_task_by_id",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.update_task",
+                            "entity": "Task",
+                            "request_model": "TaskUpdate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.delete_task",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "routes.tasks_router"
+                    ],
+                    "middleware": [
+                        "CORSMiddleware (allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])"
+                    ]
+                }
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Task",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "title",
+                                        "description",
+                                        "completed_today",
+                                        "last_completed"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "title",
+                                        "description",
+                                        "completed_today",
+                                        "last_completed"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/tasks/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A single-user expense tracking app to record amounts, categories, dates, and optional notes for personal expenses.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Expense": {
+                    "description": "A single expense record capturing the monetary amount, its category, the date it occurred, and optional notes for additional context.",
+                    "fields": {
+                        "amount": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": true
+                        },
+                        "notes": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Expense": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Categories are free-form text (no predefined category list) unless user later specifies otherwise",
+                "Amounts are whole units (integer) and currency/precision handling is out of scope unless specified"
+            ],
+            "non_goals": [
+                "User accounts, authentication, or multi-user support",
+                "Currency conversion, multi-currency support, or expense reporting beyond simple listing"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Expense",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "ExpenseCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "ExpenseUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Expense",
+                            "table_name": "expenses",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "INTEGER",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Expense",
+                            "methods": [
+                                {
+                                    "name": "create_expense",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Expense"
+                                    ],
+                                    "returns": "Expense"
+                                },
+                                {
+                                    "name": "get_expense_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Expense]"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Expense]"
+                                },
+                                {
+                                    "name": "update_expense",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "ExpenseUpdate"
+                                    ],
+                                    "returns": "Expense"
+                                },
+                                {
+                                    "name": "delete_expense",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Expense",
+                            "functions": [
+                                {
+                                    "name": "create_expense",
+                                    "inputs": [
+                                        "ExpenseCreate"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_expense_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "inputs": [],
+                                    "returns": "List[Expense]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_expense",
+                                    "inputs": [
+                                        "int",
+                                        "ExpenseUpdate"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_expense",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/expenses",
+                            "service_call": "ExpenseService.create_expense",
+                            "entity": "Expense",
+                            "request_model": "ExpenseCreate",
+                            "response_model": "Expense"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/expenses",
+                            "service_call": "ExpenseService.list_expenses",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "List[Expense]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.get_expense_by_id",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "Expense"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.update_expense",
+                            "entity": "Expense",
+                            "request_model": "ExpenseUpdate",
+                            "response_model": "Expense"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.delete_expense",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.expense_routes"
+                    ],
+                    "middleware": [
+                        "CORSMiddleware (allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])"
+                    ]
+                }
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Expense",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "amount",
+                                        "category",
+                                        "date",
+                                        "notes"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "amount",
+                                        "category",
+                                        "date",
+                                        "notes"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/expenses"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/expenses/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/expenses/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A lightweight personal bug tracker for tracking bugs in the user's projects, with title, severity, status, and description for each bug.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Bug": {
+                    "description": "A bug report for a personal project containing a short title, a severity level, a current status, and a textual description.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "severity": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "status": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Bug": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application",
+                "Open bugs are shown before closed bugs in the UI"
+            ],
+            "non_goals": []
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Bug",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "severity",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "status",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "BugCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "severity",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "status",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "BugUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "severity",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "status",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Bug",
+                            "table_name": "bugs",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "severity",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "status",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Bug",
+                            "methods": [
+                                {
+                                    "name": "create_bug",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Bug"
+                                    ],
+                                    "returns": "Bug"
+                                },
+                                {
+                                    "name": "get_bug_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Bug]"
+                                },
+                                {
+                                    "name": "list_bugs",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Bug]"
+                                },
+                                {
+                                    "name": "update_bug",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "Bug"
+                                    ],
+                                    "returns": "Bug"
+                                },
+                                {
+                                    "name": "delete_bug",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Bug",
+                            "functions": [
+                                {
+                                    "name": "create_bug",
+                                    "inputs": [
+                                        "BugCreate"
+                                    ],
+                                    "returns": "Bug",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_bug_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Bug",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_bugs",
+                                    "inputs": [],
+                                    "returns": "List[Bug]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_bug",
+                                    "inputs": [
+                                        "int",
+                                        "BugUpdate"
+                                    ],
+                                    "returns": "Bug",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_bug",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/bugs",
+                            "service_call": "BugService.create_bug",
+                            "entity": "Bug",
+                            "request_model": "BugCreate",
+                            "response_model": "Bug"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/bugs",
+                            "service_call": "BugService.list_bugs",
+                            "entity": "Bug",
+                            "request_model": null,
+                            "response_model": "List[Bug]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/bugs/{id}",
+                            "service_call": "BugService.get_bug_by_id",
+                            "entity": "Bug",
+                            "request_model": null,
+                            "response_model": "Bug"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/bugs/{id}",
+                            "service_call": "BugService.update_bug",
+                            "entity": "Bug",
+                            "request_model": "BugUpdate",
+                            "response_model": "Bug"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/bugs/{id}",
+                            "service_call": "BugService.delete_bug",
+                            "entity": "Bug",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.bug_routes"
+                    ],
+                    "middleware": [
+                        "CORSMiddleware (allow_origins=['*'], allow_credentials=True, allow_methods=['*'], allow_headers=['*'])"
+                    ]
+                }
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Bug",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "title",
+                                        "severity",
+                                        "status",
+                                        "description"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "title",
+                                        "severity",
+                                        "status",
+                                        "description"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/bugs"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/bugs"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/bugs/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/bugs/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/bugs/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A simple notes application to create, read, update, and delete notes; each note has a title and content.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Note": {
+                    "description": "A note consisting of a title and body content for user-created text entries.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "content": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Note": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution"
+            ],
+            "non_goals": []
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Note",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "content",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoteCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "content",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "NoteUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "content",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Note",
+                            "table_name": "notes",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "content",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Note",
+                            "methods": [
+                                {
+                                    "name": "create_note",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Note"
+                                    ],
+                                    "returns": "Note"
+                                },
+                                {
+                                    "name": "get_note_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Note]"
+                                },
+                                {
+                                    "name": "list_notes",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Note]"
+                                },
+                                {
+                                    "name": "update_note",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "Note"
+                                    ],
+                                    "returns": "Note"
+                                },
+                                {
+                                    "name": "delete_note",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Note",
+                            "functions": [
+                                {
+                                    "name": "create_note",
+                                    "inputs": [
+                                        "NoteCreate"
+                                    ],
+                                    "returns": "Note",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_note_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Note]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_notes",
+                                    "inputs": [],
+                                    "returns": "List[Note]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_note",
+                                    "inputs": [
+                                        "int",
+                                        "NoteUpdate"
+                                    ],
+                                    "returns": "Note",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_note",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/notes",
+                            "service_call": "NoteService.create_note",
+                            "entity": "Note",
+                            "request_model": "NoteCreate",
+                            "response_model": "Note"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/notes",
+                            "service_call": "NoteService.list_notes",
+                            "entity": "Note",
+                            "request_model": null,
+                            "response_model": "List[Note]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/notes/{id}",
+                            "service_call": "NoteService.get_note_by_id",
+                            "entity": "Note",
+                            "request_model": null,
+                            "response_model": "Note"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/notes/{id}",
+                            "service_call": "NoteService.update_note",
+                            "entity": "Note",
+                            "request_model": "NoteUpdate",
+                            "response_model": "Note"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/notes/{id}",
+                            "service_call": "NoteService.delete_note",
+                            "entity": "Note",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.notes_router"
+                    ],
+                    "middleware": [
+                        "cors_middleware"
+                    ]
+                }
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Note",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "title",
+                                        "content"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "title",
+                                        "content"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/notes"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/notes"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/notes/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/notes/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/notes/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A backend-only REST API for creating, reading, updating, and deleting tasks.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A to-do item representing work to be completed, identified by a system-generated ID.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "no_ui",
+                "interaction_style": "no_ui"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "API-only backend with REST endpoints (no frontend/UI will be provided)",
+                "Task items require at minimum a title; additional fields (description, due date, priority) are possible extensions but not included in the MVP"
+            ],
+            "non_goals": [
+                "Providing any frontend UI",
+                "Implementing advanced features such as recurrence, rich text descriptions, or collaborative multi-user features"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": null
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Task",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Task",
+                            "table_name": "tasks",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Task",
+                            "methods": [
+                                {
+                                    "name": "create_task",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Task"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Task]"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Task]"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Task",
+                            "functions": [
+                                {
+                                    "name": "create_task",
+                                    "inputs": [
+                                        "TaskCreate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "inputs": [],
+                                    "returns": "List[Task]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/tasks",
+                            "service_call": "TaskService.create_task",
+                            "entity": "Task",
+                            "request_model": "TaskCreate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks",
+                            "service_call": "TaskService.list_tasks",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "List[Task]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.get_task_by_id",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.update_task",
+                            "entity": "Task",
+                            "request_model": "TaskUpdate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.delete_task",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.task_routes:router"
+                    ],
+                    "middleware": [
+                        "BackendLoggingMiddleware",
+                        "ErrorHandlingMiddleware"
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A read-only dashboard that displays expenses aggregated and broken down by category.",
+            "app_category": "dashboard",
+            "primary_entities": {
+                "Expense": {
+                    "description": "A recorded monetary expense with an amount, date, category, and optional description used for reporting.",
+                    "fields": {
+                        "amount": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": false
+                        },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Expense": [
+                    "read"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "dashboard"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Data is provided from an external source or pre-populated; the app will not create or modify data.",
+                "Categories for expenses exist as text values on Expense entries (no separate Category entity was requested).",
+                "Aggregations (totals by category) are computed from the available Expense records at read time."
+            ],
+            "non_goals": [
+                "Creating, updating, or deleting expenses from the app",
+                "Managing categories as editable entities (no CRUD for categories)",
+                "Authentication, multi-user synchronization, or distributed data editing"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Expense",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Expense",
+                            "table_name": "expenses",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "INTEGER",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Expense",
+                            "methods": [
+                                {
+                                    "name": "get_expense_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Expense]"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Expense]"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Expense",
+                            "functions": [
+                                {
+                                    "name": "get_expense_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "inputs": [],
+                                    "returns": "List[Expense]",
+                                    "operation": "read"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "GET",
+                            "path": "/expenses",
+                            "service_call": "ExpenseService.list_expenses",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "List[Expense]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.get_expense_by_id",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "Expense"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.expense_routes"
+                    ],
+                    "middleware": []
+                }
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Expense",
+                            "views": [
+                                "dashboard",
+                                "list",
+                                "detail"
+                            ],
+                            "forms": [],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A simple browser-based notes UI that lets a user manually create and view notes; data is kept only in the frontend (no backend or APIs).",
+            "app_category": "form_app",
+            "primary_entities": {
+                "Note": {
+                    "description": "A user-created note with a short title and a body of text entered and viewed in the browser UI.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "content": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Note": [
+                    "create",
+                    "read"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "All note data is stored client-side only (no backend or API).",
+                "Data persistence across page reloads is not guaranteed unless an explicit client-side persistence mechanism (e.g., browser localStorage) is later requested."
+            ],
+            "non_goals": [
+                "Server-side persistence or APIs",
+                "User accounts or authentication",
+                "Cross-device syncing of notes"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": null,
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": []
+                }
+            ]
+        },
+        "spec_responses": [
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Note",
+                            "views": [
+                                "list",
+                                "create",
+                                "detail"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "title",
+                                        "content"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": []
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+]
