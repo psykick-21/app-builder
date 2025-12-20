@@ -2,11 +2,11 @@
     {
         "prompt": "Build a simple task management app. I should be able to create, view, update, and delete tasks. Each task should have a title and a description. Keep the UI very basic.",
         "intent": {
-            "app_summary": "A minimal single-user task management app that supports creating, viewing, updating, and deleting tasks with a very basic UI.",
+            "app_summary": "A simple task management app to create, view, update, and delete tasks.",
             "app_category": "crud_app",
             "primary_entities": {
                 "Task": {
-                    "description": "A task item representing a work item with a short title and an optional longer description.",
+                    "description": "A task item with a short title and an optional longer description used to track work to be done.",
                     "fields": {
                         "title": {
                             "type": "string",
@@ -16,7 +16,9 @@
                             "type": "string",
                             "required": false
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -34,16 +36,15 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "UI is intentionally very basic and will not include advanced controls or rich text editing"
+                "UI should be minimal/basic (simple form and list; no advanced styling or interactions)"
             ],
             "non_goals": [
-                "No authentication or multi-user collaboration",
-                "No synchronization across devices or cloud backup",
-                "No advanced UI features such as drag-and-drop ordering or rich-text task descriptions"
+                "No support for recurring tasks, attachments, or collaboration features",
+                "No advanced filtering, sorting, or analytics"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Created a minimal CRUD intent for a Task entity with title and description fields and a basic form-and-list UI.",
+        "change_summary": "Created an initial intent for a basic CRUD task management app with a single Task entity (title and description) and simple form-and-list UI.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -110,29 +111,31 @@
     {
         "prompt": "I want a small app to track things I need to do daily.",
         "intent": {
-            "app_summary": "A small single-user app to track daily to-do items (tasks) with basic create/read/update/delete operations.",
+            "app_summary": "A small single-user app to track items the user needs to do each day (daily tasks) with simple create/read/update/delete functionality.",
             "app_category": "crud_app",
             "primary_entities": {
                 "Task": {
-                    "description": "A to-do item that the user needs to do on a given day, with an optional note and completion state.",
+                    "description": "A daily task or item the user intends to perform each day, with optional notes and simple completion tracking.",
                     "fields": {
                         "title": {
                             "type": "string",
                             "required": true
                         },
-                        "notes": {
+                        "description": {
                             "type": "string",
                             "required": false
                         },
-                        "date": {
-                            "type": "date",
+                        "completed_today": {
+                            "type": "boolean",
                             "required": false
                         },
-                        "completed": {
-                            "type": "boolean",
-                            "required": true
+                        "last_completed": {
+                            "type": "date",
+                            "required": false
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -150,17 +153,18 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "The user wants to track items per day; 'date' can be used to associate a task with a specific day.",
-                "Recurring/daily-repeat patterns (e.g., automatic recurrence, rules) are NOT specified and would be a potential extension if requested.",
-                "Tasks are plain text entries (no rich media) unless the user requests otherwise."
+                "Tasks represent items the user wants to do on a daily basis, but the system does not necessarily enforce complex recurrence rules (recurrence patterns are out of scope for the MVP).",
+                "Completion is tracked at a simple level (completed_today boolean and optional last_completed date) rather than full per-day history unless explicitly requested later."
             ],
             "non_goals": [
-                "No multi-user collaboration or sharing features.",
-                "No automatic push notifications or integrations unless explicitly requested."
+                "Multi-user collaboration or user accounts",
+                "Cross-device syncing or offline sync",
+                "Built-in reminders/notifications and advanced recurrence management",
+                "Analytics or reporting dashboards"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Created initial CRUD intent for a single 'Task' entity to track daily to-do items with title, notes, date, and completion state. Included basic UI expectations and assumptions about recurrence and single-user/local use.",
+        "change_summary": "Created initial intent for a simple daily task tracking CRUD app with a Task entity, basic fields (title, description, completed_today, last_completed), auto-increment IDs, and standard CRUD operations. UI set as basic form-and-list; assumptions and non-goals listed.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -227,11 +231,11 @@
     {
         "prompt": "Create an expense tracking app. Each expense should have an amount, category, date, and optional notes. I only need this for myself, no login or multi-user support.",
         "intent": {
-            "app_summary": "A personal expense tracking app to record individual expenses with amount, category, date, and optional notes.",
+            "app_summary": "A single-user expense tracking app to record amounts, categories, dates, and optional notes for personal expenses.",
             "app_category": "crud_app",
             "primary_entities": {
                 "Expense": {
-                    "description": "A single monetary expense record with an amount, category, date, and optional notes.",
+                    "description": "A single expense record capturing the monetary amount, its category, the date it occurred, and optional notes for additional context.",
                     "fields": {
                         "amount": {
                             "type": "integer",
@@ -249,7 +253,9 @@
                             "type": "string",
                             "required": false
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -267,15 +273,16 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "No login or multi-user support is required",
-                "Category is captured as a text field (free-form) unless a predefined category list is later requested"
+                "Categories are free-form text (no predefined category list) unless user later specifies otherwise",
+                "Amounts are whole units (integer) and currency/precision handling is out of scope unless specified"
             ],
             "non_goals": [
-                "Authentication or multi-user support"
+                "User accounts, authentication, or multi-user support",
+                "Currency conversion, multi-currency support, or expense reporting beyond simple listing"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Created initial intent for a personal expense tracker with a single Expense entity (amount, category, date, notes) supporting full CRUD and a basic form-and-list UI.",
+        "change_summary": "Created initial intent for a single-user expense tracker with one entity 'Expense' (amount, category, date, notes), full CRUD operations, basic form-and-list UI, and default auto_increment IDs.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -342,11 +349,11 @@
     {
         "prompt": "Build a lightweight bug tracker for my personal projects. Each bug should have a title, severity, status, and description. I want to see all open bugs first.",
         "intent": {
-            "app_summary": "A lightweight personal bug tracker that stores bugs with title, severity, status, and description, prioritizing open bugs in the UI.",
+            "app_summary": "A lightweight personal bug tracker for tracking bugs in the user's projects, with title, severity, status, and description for each bug.",
             "app_category": "crud_app",
             "primary_entities": {
                 "Bug": {
-                    "description": "A single bug report for a personal project, capturing its title, severity, current status, and a longer description.",
+                    "description": "A bug report for a personal project containing a short title, a severity level, a current status, and a textual description.",
                     "fields": {
                         "title": {
                             "type": "string",
@@ -364,7 +371,9 @@
                             "type": "string",
                             "required": false
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -380,15 +389,14 @@
                 "interaction_style": "form_and_list"
             },
             "assumptions": [
-                "Single-user application",
                 "Local execution",
-                "Open bugs are shown before non-open bugs in lists (user requested ordering preference).",
-                "Allowed values for 'severity' and 'status' (e.g., 'low/medium/high' or 'open/closed') are not specified and should be defined during implementation."
+                "Single-user application",
+                "Open bugs are shown before closed bugs in the UI"
             ],
             "non_goals": []
         },
         "mode": "CREATE",
-        "change_summary": "Created initial intent for a personal bug tracker with one primary entity 'Bug' (title, severity, status, description), full CRUD operations, basic form-and-list UI, and an assumption to display open bugs first.",
+        "change_summary": "Initial intent specification for a lightweight personal bug tracker.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -455,11 +463,11 @@
     {
         "prompt": "Build a notes app where I can create, edit, and delete notes. Each note should have a title and content.",
         "intent": {
-            "app_summary": "A simple notes application to create, read, update, and delete notes. Each note has a title and content.",
+            "app_summary": "A simple notes application to create, read, update, and delete notes; each note has a title and content.",
             "app_category": "crud_app",
             "primary_entities": {
                 "Note": {
-                    "description": "A user-created note that contains a concise title and a body of content.",
+                    "description": "A note consisting of a title and body content for user-created text entries.",
                     "fields": {
                         "title": {
                             "type": "string",
@@ -468,12 +476,10 @@
                         "content": {
                             "type": "string",
                             "required": true
-                        },
-                        "created_at": {
-                            "type": "date",
-                            "required": false
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -489,13 +495,13 @@
                 "interaction_style": "form_and_list"
             },
             "assumptions": [
-                "Local execution",
-                "Single-user application"
+                "Single-user application",
+                "Local execution"
             ],
             "non_goals": []
         },
         "mode": "CREATE",
-        "change_summary": "Created intent for a basic notes CRUD app with a single Note entity (title and content required) and full CRUD operations. UI expected to be basic form-and-list.",
+        "change_summary": "Initial intent created for a basic CRUD notes app with a Note entity having title and content.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -562,21 +568,19 @@
     {
         "prompt": "Build a backend-only API for managing tasks. I don't need any UI. I just want REST endpoints to create, update, list, and delete tasks.",
         "intent": {
-            "app_summary": "A backend-only REST API for managing tasks (create, read/list, update, delete).",
-            "app_category": "api_service",
+            "app_summary": "A backend-only REST API for creating, reading, updating, and deleting tasks.",
+            "app_category": "crud_app",
             "primary_entities": {
                 "Task": {
-                    "description": "A work item with a unique identifier and a short title",
+                    "description": "A to-do item representing work to be completed, identified by a system-generated ID.",
                     "fields": {
-                        "id": {
-                            "type": "integer",
-                            "required": true
-                        },
                         "title": {
                             "type": "string",
                             "required": true
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -594,19 +598,16 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "API-only: no user interface will be provided; consumers will call REST endpoints",
-                "Identifier (id) is managed by the backend and required to identify tasks for read/update/delete",
-                "The user did not specify additional Task fields such as description, due date, or status; those are intentionally omitted from the minimal MVP",
-                "Authentication, authorization, pagination, and filtering are not specified and therefore out of scope unless the user asks for them"
+                "API-only backend with REST endpoints (no frontend/UI will be provided)",
+                "Task items require at minimum a title; additional fields (description, due date, priority) are possible extensions but not included in the MVP"
             ],
             "non_goals": [
-                "Providing any frontend or UI",
-                "Adding authentication/authorization by default",
-                "Real-time sync (websockets) or push notifications"
+                "Providing any frontend UI",
+                "Implementing advanced features such as recurrence, rich text descriptions, or collaborative multi-user features"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Created initial intent for a backend-only REST API managing a single Task entity with CRUD operations; kept Task fields minimal (id, title) and recorded open questions as assumptions.",
+        "change_summary": "Created an intent for a backend-only REST CRUD API managing a single Task entity with a required title field and auto-increment IDs.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -664,33 +665,31 @@
     {
         "prompt": "Build a read-only dashboard that shows expenses by category. I don't want to create or edit data from the app \u2014 just view it.",
         "intent": {
-            "app_summary": "A read-only dashboard that displays expenses aggregated and visualized by category.",
+            "app_summary": "A read-only dashboard that displays expenses aggregated and broken down by category.",
             "app_category": "dashboard",
             "primary_entities": {
                 "Expense": {
-                    "description": "A recorded expense with an amount, category, optional date, and optional descriptive note.",
+                    "description": "A recorded monetary expense with an amount, date, category, and optional description used for reporting.",
                     "fields": {
-                        "id": {
-                            "type": "string",
-                            "required": false
-                        },
                         "amount": {
                             "type": "integer",
-                            "required": true
-                        },
-                        "category": {
-                            "type": "string",
                             "required": true
                         },
                         "date": {
                             "type": "date",
                             "required": false
                         },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
                         "description": {
                             "type": "string",
                             "required": false
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -705,17 +704,18 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "Data is provided to the dashboard from an existing external source or import; the app does not manage data creation or modification.",
-                "Aggregations (expenses by category) are computed from available Expense records; exact aggregation intervals (daily/weekly/monthly) are unspecified."
+                "Data is provided from an external source or pre-populated; the app will not create or modify data.",
+                "Categories for expenses exist as text values on Expense entries (no separate Category entity was requested).",
+                "Aggregations (totals by category) are computed from the available Expense records at read time."
             ],
             "non_goals": [
-                "Creating expenses from the UI",
-                "Editing or deleting expenses from the UI",
-                "User management or multi-user synchronization"
+                "Creating, updating, or deleting expenses from the app",
+                "Managing categories as editable entities (no CRUD for categories)",
+                "Authentication, multi-user synchronization, or distributed data editing"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Created initial intent for a read-only expenses-by-category dashboard with a single Expense entity (read-only).",
+        "change_summary": "Created an intent for a read-only expenses dashboard centered on an Expense entity with read-only operations and dashboard UI expectations.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -782,11 +782,11 @@
     {
         "prompt": "Build a simple UI that lets me manually enter and view notes in the browser. I don't need any backend or APIs \u2014 the data can live only in the UI for now.",
         "intent": {
-            "app_summary": "A simple single-page browser UI for manually entering and viewing notes; data remains only in the UI (no backend).",
-            "app_category": "crud_app",
+            "app_summary": "A simple browser-based notes UI that lets a user manually create and view notes; data is kept only in the frontend (no backend or APIs).",
+            "app_category": "form_app",
             "primary_entities": {
                 "Note": {
-                    "description": "A user-created note consisting of a short title and the note body text",
+                    "description": "A user-created note with a short title and a body of text entered and viewed in the browser UI.",
                     "fields": {
                         "title": {
                             "type": "string",
@@ -796,7 +796,9 @@
                             "type": "string",
                             "required": true
                         }
-                    }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
                 }
             },
             "operations": {
@@ -812,17 +814,17 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "Notes are stored only in the browser's UI state (in-memory or browser storage) and are not persisted to a backend by default",
-                "Notes are plain text (no rich text or attachments) unless the user later requests otherwise"
+                "All note data is stored client-side only (no backend or API).",
+                "Data persistence across page reloads is not guaranteed unless an explicit client-side persistence mechanism (e.g., browser localStorage) is later requested."
             ],
             "non_goals": [
-                "No backend or API integration",
-                "No user authentication or accounts",
-                "No multi-device synchronization or server-side persistence"
+                "Server-side persistence or APIs",
+                "User accounts or authentication",
+                "Cross-device syncing of notes"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Initial intent: simple browser-only notes UI supporting manual entry and viewing of notes (create and read).",
+        "change_summary": "Initial intent created: single Note entity with title and content, frontend-only storage, create/read operations, basic form-and-list UI.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
