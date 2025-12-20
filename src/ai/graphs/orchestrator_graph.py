@@ -12,6 +12,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from ..graph_states.orchestrator_state import OrchestratorState
 from ..agents.intent_interpreter_agent import IntentInterpreterAgent
 from ..agents.architect_agent import ArchitectAgent
+from ..utils.system_config import system_config
 
 
 # ==================== Save Nodes ====================
@@ -105,10 +106,27 @@ def create_orchestrator_graph():
     # Create the graph
     workflow = StateGraph(OrchestratorState)
     
-    # Add nodes - use agents directly
-    workflow.add_node("intent_interpreter", IntentInterpreterAgent())
+    # Add nodes - use agents directly with system config
+    intent_config = system_config["intent_interpreter"]
+    architect_config = system_config["architect"]
+    
+    workflow.add_node(
+        "intent_interpreter",
+        IntentInterpreterAgent(
+            provider=intent_config["provider"],
+            model=intent_config["model"],
+            additional_kwargs=intent_config["additional_kwargs"],
+        )
+    )
     workflow.add_node("save_intent", save_intent_node)
-    workflow.add_node("architect", ArchitectAgent())
+    workflow.add_node(
+        "architect",
+        ArchitectAgent(
+            provider=architect_config["provider"],
+            model=architect_config["model"],
+            additional_kwargs=architect_config["additional_kwargs"],
+        )
+    )
     workflow.add_node("save_architecture", save_architecture_node)
     
     # Set entry point
