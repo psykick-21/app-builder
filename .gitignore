@@ -162,3 +162,4 @@ cython_debug/
 .cursor/
 *.DS_Store
 generated_apps/
+todo.txt
