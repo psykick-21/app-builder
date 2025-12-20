@@ -6,8 +6,8 @@ from typing import Literal, Optional, Dict, List
 # Constants for validation
 ALLOWED_FIELD_TYPES = Literal["string", "integer", "boolean", "date"]
 ALLOWED_CRUD_OPERATIONS = Literal["create", "read", "update", "delete"]
-ALLOWED_UI_COMPLEXITY = Literal["basic", "intermediate", "advanced"]
-ALLOWED_INTERACTION_STYLES = Literal["form_and_list", "dashboard", "wizard", "single_page"]
+ALLOWED_UI_COMPLEXITY = Literal["basic", "intermediate", "advanced", "no_ui"]
+ALLOWED_INTERACTION_STYLES = Literal["form_and_list", "dashboard", "wizard", "single_page", "no_ui"]
 ALLOWED_APP_CATEGORIES = Literal["crud_app", "dashboard", "form_app", "api_service", "other"]
 
 
@@ -86,18 +86,20 @@ class UIExpectations(BaseModel):
     - 'single_page': Simple single-view apps
     - 'dashboard': Data visualization focused apps
     - 'wizard': Step-by-step guided flows
+    - 'no_ui': Backend-only/API services with no UI
     """
     
     complexity: ALLOWED_UI_COMPLEXITY = Field(
         default="basic",
-        description="Expected UI complexity level (basic, intermediate, or advanced)"
+        description="Expected UI complexity level (basic, intermediate, advanced, or no_ui for backend-only)"
     )
     interaction_style: ALLOWED_INTERACTION_STYLES = Field(
         default="form_and_list",
         description=(
             "Expected interaction style: "
             "'form_and_list' for CRUD apps, 'single_page' for simple views, "
-            "'dashboard' for data viz, 'wizard' for guided flows"
+            "'dashboard' for data viz, 'wizard' for guided flows, "
+            "'no_ui' for backend-only/API services"
         )
     )
 
@@ -147,7 +149,9 @@ class IntentModel(BaseModel):
         default_factory=lambda: ["Single-user application", "Local execution"],
         description=(
             "List of assumptions about the application context. "
-            "Include user preferences about ordering/filtering here (e.g., 'Open bugs shown first')."
+            "The defaults 'Single-user application' and 'Local execution' are MANDATORY and automatically included. "
+            "Add additional assumptions only if there are other implicit constraints or user preferences "
+            "(e.g., 'Open bugs shown first', 'Notes are plain text only')."
         )
     )
     

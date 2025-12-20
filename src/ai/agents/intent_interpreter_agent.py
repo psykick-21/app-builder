@@ -1,10 +1,11 @@
 """Intent Interpreter Agent - translates natural language into structured intent."""
 
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import json
 from dotenv import load_dotenv
 import os
 
+from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
 
@@ -29,16 +30,17 @@ class IntentInterpreterAgent:
             model_name: The OpenAI model to use
             temperature: Temperature for LLM generation (0.0 for deterministic output)
         """
-        self.llm = ChatOllama(
-            base_url=OLLAMA_BASE_URL,
-            model="gpt-oss:20b",
-        )
-        # self.llm = ChatOpenAI(
-        #     model="gpt-5-nano",
+        # self.llm = ChatOllama(
+        #     base_url=OLLAMA_BASE_URL,
+        #     model="gpt-oss:20b",
         # )
+        self.llm = ChatOpenAI(
+            model="gpt-5-mini",
+            reasoning_effort="low",
+        )
         
         # Create LLM with structured output for both modes
-        self.llm = self.llm.with_structured_output(IntentInterpreterResponse)
+        self.llm = self.llm.with_structured_output(IntentInterpreterResponse, method="function_calling")
         
         # Create chains for both modes
         self.create_chain = INTENT_INTERPRETER_CREATE_PROMPT | self.llm
@@ -92,11 +94,12 @@ class IntentInterpreterAgent:
         
         return IntentInterpreterResponse(**response_dict)
     
-    def __call__(self, state: IntentInterpreterState) -> IntentInterpreterState:
+    def __call__(self, state: IntentInterpreterState, config: Optional[RunnableConfig] = None) -> IntentInterpreterState:
         """LangGraph node interface.
         
         Args:
             state: Current workflow state
+            config: Optional runtime configuration
             
         Returns:
             Updated state with intent, mode, and change_summary

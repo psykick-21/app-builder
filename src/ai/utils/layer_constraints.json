@@ -1,0 +1,130 @@
+{
+    "backend_models": {
+      "layer_role": "domain_modeling",
+      "allowed": [
+        "data_structures",
+        "type_definitions",
+        "validation_rules"
+      ],
+      "forbidden": [
+        "http",
+        "routing",
+        "database_queries",
+        "persistence_logic",
+        "business_logic",
+        "ui_logic",
+        "external_api_calls"
+      ],
+      "must_define": [
+        "entity_models"
+      ],
+      "notes": "Defines domain entities and their fields. Pure data definitions only."
+    },
+  
+    "database": {
+      "layer_role": "persistence",
+      "allowed": [
+        "schema_definitions",
+        "database_tables",
+        "queries",
+        "repositories",
+        "data_access_logic"
+      ],
+      "forbidden": [
+        "http",
+        "routing",
+        "ui_logic",
+        "business_logic",
+        "external_api_calls"
+      ],
+      "must_define": [
+        "storage_schema",
+        "data_access_methods"
+      ],
+      "notes": "Responsible for how data is stored and retrieved. No business decisions."
+    },
+  
+    "backend_services": {
+      "layer_role": "business_logic",
+      "allowed": [
+        "business_rules",
+        "entity_operations",
+        "orchestration_logic",
+        "data_transformation"
+      ],
+      "forbidden": [
+        "http",
+        "routing",
+        "ui_logic",
+        "database_schema_definitions",
+        "external_api_calls"
+      ],
+      "must_define": [
+        "service_functions"
+      ],
+      "notes": "Implements core application logic. Calls database layer, never handles HTTP."
+    },
+  
+    "backend_routes": {
+      "layer_role": "http_interface",
+      "allowed": [
+        "http_endpoints",
+        "request_parsing",
+        "response_serialization",
+        "calling_services"
+      ],
+      "forbidden": [
+        "business_logic",
+        "database_queries",
+        "ui_logic",
+        "state_management"
+      ],
+      "must_define": [
+        "api_routes"
+      ],
+      "notes": "Thin HTTP layer. Delegates all logic to services."
+    },
+  
+    "backend_app": {
+      "layer_role": "application_bootstrap",
+      "allowed": [
+        "application_initialization",
+        "dependency_wiring",
+        "router_registration",
+        "middleware_setup"
+      ],
+      "forbidden": [
+        "business_logic",
+        "database_queries",
+        "ui_logic",
+        "domain_model_definitions"
+      ],
+      "must_define": [
+        "app_entrypoint"
+      ],
+      "notes": "Bootstraps the backend application and wires all components together."
+    },
+  
+    "frontend_ui": {
+      "layer_role": "user_interface",
+      "allowed": [
+        "ui_components",
+        "forms",
+        "lists",
+        "dashboards",
+        "api_consumption",
+        "local_state_management"
+      ],
+      "forbidden": [
+        "database_queries",
+        "business_logic",
+        "server_side_routing",
+        "schema_definitions"
+      ],
+      "must_define": [
+        "ui_views"
+      ],
+      "notes": "Responsible for rendering and user interaction only. Consumes APIs or local state."
+    }
+}
+  

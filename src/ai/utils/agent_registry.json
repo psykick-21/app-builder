@@ -1,0 +1,50 @@
+[
+  {
+    "agent_id": "BackendModelAgent",
+    "category": "code_generation",
+    "layer_type": "backend_models",
+    "description": "Generates backend data models from entities",
+    "output_scope": "backend/models",
+    "mandatory": true
+  },
+  {
+    "agent_id": "BackendServiceAgent",
+    "category": "code_generation",
+    "layer_type": "backend_services",
+    "description": "Implements business logic and CRUD operations",
+    "output_scope": "backend/services",
+    "mandatory": true
+  },
+  {
+    "agent_id": "BackendRouteAgent",
+    "category": "code_generation",
+    "layer_type": "backend_routes",
+    "description": "Exposes HTTP APIs using FastAPI",
+    "output_scope": "backend/routes",
+    "mandatory": true
+  },
+  {
+    "agent_id": "BackendAppBootstrapAgent",
+    "category": "code_generation",
+    "layer_type": "backend_app",
+    "description": "Bootstraps the backend application entrypoint",
+    "output_scope": "backend/main.py",
+    "mandatory": true
+  },
+  {
+    "agent_id": "FrontendAgent",
+    "category": "code_generation",
+    "layer_type": "frontend_ui",
+    "description": "Generates Streamlit-based frontend UI",
+    "output_scope": "frontend",
+    "mandatory": true
+  },
+  {
+    "agent_id": "DatabaseAgent",
+    "category": "code_generation",
+    "layer_type": "database",
+    "description": "Initializes SQLite database and tables. Always included in canonical architecture.",
+    "output_scope": "backend/db",
+    "mandatory": true
+  }
+]

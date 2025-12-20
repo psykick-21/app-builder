@@ -13,5 +13,14 @@
     },
     {
         "prompt": "Build a notes app where I can create, edit, and delete notes. Each note should have a title and content."    
+    },
+    {
+        "prompt": "Build a backend-only API for managing tasks. I don't need any UI. I just want REST endpoints to create, update, list, and delete tasks."
+    },
+    {
+        "prompt": "Build a read-only dashboard that shows expenses by category. I don't want to create or edit data from the app — just view it."
+    },
+    {
+        "prompt": "Build a simple UI that lets me manually enter and view notes in the browser. I don't need any backend or APIs — the data can live only in the UI for now."
     }
 ]
