@@ -12,6 +12,23 @@ from .architect_models import (
     ExecutionLayer,
     ArchitectResponse,
 )
+from .spec_planner_models import (
+    ModelField,
+    ModelDefinition,
+    BackendModelsSpec,
+    DatabaseTableColumn,
+    DatabaseTable,
+    DatabaseSpec,
+    ServiceFunction,
+    EntityService,
+    BackendServicesSpec,
+    APIEndpoint,
+    RouteDefinition,
+    BackendRoutesSpec,
+    BackendAppBootstrapSpec,
+    PageView,
+    FrontendUISpec,
+)
 
 __all__ = [
     "EntityField",
@@ -22,5 +39,20 @@ __all__ = [
     "TechStack",
     "ExecutionLayer",
     "ArchitectResponse",
+    "ModelField",
+    "ModelDefinition",
+    "BackendModelsSpec",
+    "DatabaseTableColumn",
+    "DatabaseTable",
+    "DatabaseSpec",
+    "ServiceFunction",
+    "EntityService",
+    "BackendServicesSpec",
+    "APIEndpoint",
+    "RouteDefinition",
+    "BackendRoutesSpec",
+    "BackendAppBootstrapSpec",
+    "PageView",
+    "FrontendUISpec",
 ]
 
