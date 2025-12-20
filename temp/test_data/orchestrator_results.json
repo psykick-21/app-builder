@@ -1,0 +1,843 @@
+[
+    {
+        "prompt": "Build a simple task management app. I should be able to create, view, update, and delete tasks. Each task should have a title and a description. Keep the UI very basic.",
+        "intent": {
+            "app_summary": "A minimal single-user task management app that supports creating, viewing, updating, and deleting tasks with a very basic UI.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A task item representing a work item with a short title and an optional longer description.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "UI is intentionally very basic and will not include advanced controls or rich text editing"
+            ],
+            "non_goals": [
+                "No authentication or multi-user collaboration",
+                "No synchronization across devices or cloud backup",
+                "No advanced UI features such as drag-and-drop ordering or rich-text task descriptions"
+            ]
+        },
+        "mode": "CREATE",
+        "change_summary": "Created a minimal CRUD intent for a Task entity with title and description fields and a basic form-and-list UI.",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "prompt": "I want a small app to track things I need to do daily.",
+        "intent": {
+            "app_summary": "A small single-user app to track daily to-do items (tasks) with basic create/read/update/delete operations.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A to-do item that the user needs to do on a given day, with an optional note and completion state.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "notes": {
+                            "type": "string",
+                            "required": false
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": false
+                        },
+                        "completed": {
+                            "type": "boolean",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "The user wants to track items per day; 'date' can be used to associate a task with a specific day.",
+                "Recurring/daily-repeat patterns (e.g., automatic recurrence, rules) are NOT specified and would be a potential extension if requested.",
+                "Tasks are plain text entries (no rich media) unless the user requests otherwise."
+            ],
+            "non_goals": [
+                "No multi-user collaboration or sharing features.",
+                "No automatic push notifications or integrations unless explicitly requested."
+            ]
+        },
+        "mode": "CREATE",
+        "change_summary": "Created initial CRUD intent for a single 'Task' entity to track daily to-do items with title, notes, date, and completion state. Included basic UI expectations and assumptions about recurrence and single-user/local use.",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "prompt": "Create an expense tracking app. Each expense should have an amount, category, date, and optional notes. I only need this for myself, no login or multi-user support.",
+        "intent": {
+            "app_summary": "A personal expense tracking app to record individual expenses with amount, category, date, and optional notes.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Expense": {
+                    "description": "A single monetary expense record with an amount, category, date, and optional notes.",
+                    "fields": {
+                        "amount": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": true
+                        },
+                        "notes": {
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Expense": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "No login or multi-user support is required",
+                "Category is captured as a text field (free-form) unless a predefined category list is later requested"
+            ],
+            "non_goals": [
+                "Authentication or multi-user support"
+            ]
+        },
+        "mode": "CREATE",
+        "change_summary": "Created initial intent for a personal expense tracker with a single Expense entity (amount, category, date, notes) supporting full CRUD and a basic form-and-list UI.",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "prompt": "Build a lightweight bug tracker for my personal projects. Each bug should have a title, severity, status, and description. I want to see all open bugs first.",
+        "intent": {
+            "app_summary": "A lightweight personal bug tracker that stores bugs with title, severity, status, and description, prioritizing open bugs in the UI.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Bug": {
+                    "description": "A single bug report for a personal project, capturing its title, severity, current status, and a longer description.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "severity": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "status": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Bug": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Open bugs are shown before non-open bugs in lists (user requested ordering preference).",
+                "Allowed values for 'severity' and 'status' (e.g., 'low/medium/high' or 'open/closed') are not specified and should be defined during implementation."
+            ],
+            "non_goals": []
+        },
+        "mode": "CREATE",
+        "change_summary": "Created initial intent for a personal bug tracker with one primary entity 'Bug' (title, severity, status, description), full CRUD operations, basic form-and-list UI, and an assumption to display open bugs first.",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "prompt": "Build a notes app where I can create, edit, and delete notes. Each note should have a title and content.",
+        "intent": {
+            "app_summary": "A simple notes application to create, read, update, and delete notes. Each note has a title and content.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Note": {
+                    "description": "A user-created note that contains a concise title and a body of content.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "content": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "created_at": {
+                            "type": "date",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Note": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application"
+            ],
+            "non_goals": []
+        },
+        "mode": "CREATE",
+        "change_summary": "Created intent for a basic notes CRUD app with a single Note entity (title and content required) and full CRUD operations. UI expected to be basic form-and-list.",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "prompt": "Build a backend-only API for managing tasks. I don't need any UI. I just want REST endpoints to create, update, list, and delete tasks.",
+        "intent": {
+            "app_summary": "A backend-only REST API for managing tasks (create, read/list, update, delete).",
+            "app_category": "api_service",
+            "primary_entities": {
+                "Task": {
+                    "description": "A work item with a unique identifier and a short title",
+                    "fields": {
+                        "id": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "no_ui",
+                "interaction_style": "no_ui"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "API-only: no user interface will be provided; consumers will call REST endpoints",
+                "Identifier (id) is managed by the backend and required to identify tasks for read/update/delete",
+                "The user did not specify additional Task fields such as description, due date, or status; those are intentionally omitted from the minimal MVP",
+                "Authentication, authorization, pagination, and filtering are not specified and therefore out of scope unless the user asks for them"
+            ],
+            "non_goals": [
+                "Providing any frontend or UI",
+                "Adding authentication/authorization by default",
+                "Real-time sync (websockets) or push notifications"
+            ]
+        },
+        "mode": "CREATE",
+        "change_summary": "Created initial intent for a backend-only REST API managing a single Task entity with CRUD operations; kept Task fields minimal (id, title) and recorded open questions as assumptions.",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": null
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "prompt": "Build a read-only dashboard that shows expenses by category. I don't want to create or edit data from the app \u2014 just view it.",
+        "intent": {
+            "app_summary": "A read-only dashboard that displays expenses aggregated and visualized by category.",
+            "app_category": "dashboard",
+            "primary_entities": {
+                "Expense": {
+                    "description": "A recorded expense with an amount, category, optional date, and optional descriptive note.",
+                    "fields": {
+                        "id": {
+                            "type": "string",
+                            "required": false
+                        },
+                        "amount": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": false
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Expense": [
+                    "read"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "dashboard"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Data is provided to the dashboard from an existing external source or import; the app does not manage data creation or modification.",
+                "Aggregations (expenses by category) are computed from available Expense records; exact aggregation intervals (daily/weekly/monthly) are unspecified."
+            ],
+            "non_goals": [
+                "Creating expenses from the UI",
+                "Editing or deleting expenses from the UI",
+                "User management or multi-user synchronization"
+            ]
+        },
+        "mode": "CREATE",
+        "change_summary": "Created initial intent for a read-only expenses-by-category dashboard with a single Expense entity (read-only).",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        }
+    },
+    {
+        "prompt": "Build a simple UI that lets me manually enter and view notes in the browser. I don't need any backend or APIs \u2014 the data can live only in the UI for now.",
+        "intent": {
+            "app_summary": "A simple single-page browser UI for manually entering and viewing notes; data remains only in the UI (no backend).",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Note": {
+                    "description": "A user-created note consisting of a short title and the note body text",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "content": {
+                            "type": "string",
+                            "required": true
+                        }
+                    }
+                }
+            },
+            "operations": {
+                "Note": [
+                    "create",
+                    "read"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Notes are stored only in the browser's UI state (in-memory or browser storage) and are not persisted to a backend by default",
+                "Notes are plain text (no rich text or attachments) unless the user later requests otherwise"
+            ],
+            "non_goals": [
+                "No backend or API integration",
+                "No user authentication or accounts",
+                "No multi-device synchronization or server-side persistence"
+            ]
+        },
+        "mode": "CREATE",
+        "change_summary": "Initial intent: simple browser-only notes UI supporting manual entry and viewing of notes (create and read).",
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": null,
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": []
+                }
+            ]
+        }
+    }
+]
