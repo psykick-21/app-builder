@@ -177,6 +177,28 @@ Your output should reflect:
 - Proper ordering for sequential execution
 - Standard naming conventions and paths
 
+### Execution Layer Structure
+
+Each execution layer in your response must have this exact structure:
+```json
+{{
+  "id": "backend_models",
+  "type": "code_generation",
+  "generator": "BackendModelAgent",
+  "path": "backend/models",
+  "depends_on": []
+}}
+```
+
+**CRITICAL**: The `type` field must ALWAYS be set to "code_generation" for ALL layers. Do not use layer IDs or other values in the `type` field.
+
+**Field Breakdown**:
+- `id`: The layer identifier (e.g., "backend_models", "database", "frontend_ui", etc.)
+- `type`: ALWAYS "code_generation" (this is the layer category, not the layer ID)
+- `generator`: The agent ID from the registry (e.g., "BackendModelAgent", "DatabaseAgent")
+- `path`: The filesystem path (e.g., "backend/models", "frontend")
+- `depends_on`: Array of layer IDs this layer depends on (e.g., ["backend_models"])
+
 ## Agent Registry
 
 {agent_registry}
@@ -282,6 +304,29 @@ In these cases, return the existing architecture unchanged.
 - Do NOT "improve" the existing architecture
 - Do NOT add assumptions to the intent
 - Do NOT make product decisions
+
+## OUTPUT GUIDANCE
+
+Your output must:
+- Preserve ALL existing layer IDs, types, generators, and paths exactly
+- Keep the same architecture_version unless structure fundamentally changes
+- Add new layers ONLY if absolutely necessary
+- Maintain proper dependency relationships
+
+### Execution Layer Structure (When Adding New Layers)
+
+If you must add a new layer, use this exact structure:
+```json
+{{
+  "id": "new_layer_id",
+  "type": "code_generation",
+  "generator": "AppropriateAgent",
+  "path": "appropriate/path",
+  "depends_on": ["existing_layer_id"]
+}}
+```
+
+**CRITICAL**: The `type` field must ALWAYS be "code_generation" for ALL layers (existing and new). This is the layer category, not the layer identifier.
 
 ## Agent Registry
 
