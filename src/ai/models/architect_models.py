@@ -85,7 +85,7 @@ class ExecutionLayer(BaseModel):
     )
     type: ALLOWED_LAYER_TYPES = Field(
         default="code_generation",
-        description="Layer category (code_generation for MVP)"
+        description="Layer category - always set to 'code_generation' for all layers in MVP"
     )
     generator: str = Field(
         description=(
@@ -181,23 +181,3 @@ class ArchitectResponse(BaseModel):
                 )
         
         return v
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """Convert to dictionary format for JSON serialization."""
-        return {
-            "architecture_version": self.architecture_version,
-            "tech_stack": {
-                "backend": self.tech_stack.backend,
-                "frontend": self.tech_stack.frontend,
-            },
-            "execution_layers": [
-                {
-                    "id": layer.id,
-                    "type": layer.type,
-                    "generator": layer.generator,
-                    "path": layer.path,
-                    "depends_on": layer.depends_on,
-                }
-                for layer in self.execution_layers
-            ]
-        }
