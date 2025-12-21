@@ -18,6 +18,7 @@ class CodeAgentsState(TypedDict, total=False):
     manifests: Optional[List[Dict[str, Any]]]  # Manifest of tasks/items
     existing_intent: Optional[Dict[str, Any]]  # Existing intent (for finalization)
     existing_architecture: Optional[Dict[str, Any]]  # Existing architecture (for finalization)
+    affected_layers: Optional[List[str]]  # List of layer IDs affected by changes (for MODIFY mode)
 
     # === To determine execution order ===
     execution_queue: Optional[List[str]]  # List of layer IDs in execution order
