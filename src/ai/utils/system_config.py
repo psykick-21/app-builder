@@ -23,4 +23,18 @@ system_config = {
             "reasoning_effort": "medium",
         },
     },
+    "spec_planner": {
+        "provider": "openai",
+        "model": "gpt-5-mini",
+        "additional_kwargs": {
+            "reasoning_effort": "medium",
+        },
+    },
+    "backend_model_agent": {
+        "provider": "openai",
+        "model": "gpt-5-mini",
+        "additional_kwargs": {
+            "reasoning_effort": "low",
+        },
+    }
 }
