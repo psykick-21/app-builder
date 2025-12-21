@@ -12,6 +12,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from ..graph_states.orchestrator_state import OrchestratorState
 from ..agents.intent_interpreter_agent import IntentInterpreterAgent
 from ..agents.architect_agent import ArchitectAgent
+from ..agents.spec_planner_agent import SpecPlannerAgent
 from ..utils.system_config import system_config
 
 
@@ -89,13 +90,49 @@ def save_architecture_node(state: OrchestratorState, config: Optional[RunnableCo
     return state
 
 
+def save_spec_plan_node(state: OrchestratorState, config: Optional[RunnableConfig] = None) -> OrchestratorState:
+    """Save spec plan to spec directory based on thread_id from config.
+    
+    Saves spec_plan.json to generated_apps/<thread_id>/spec/spec_plan.json
+    """
+    spec_plan = state.get("spec_plan")
+    
+    if not spec_plan:
+        # Nothing to save
+        return state
+    
+    # Infer app_id (thread_id) from config
+    if config is None:
+        raise ValueError("config is required to get thread_id")
+    
+    # Access configurable from RunnableConfig (RunnableConfig is a TypedDict, supports dict access)
+    configurable = config.get("configurable", {})  # type: ignore
+    thread_id = configurable.get("thread_id") if isinstance(configurable, dict) else None
+    if not thread_id:
+        raise ValueError("thread_id is required in config.configurable to save spec_plan")
+    
+    # Create directory structure: generated_apps/<thread_id>/spec/
+    spec_dir = Path("generated_apps") / thread_id / "spec"
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    
+    # File path
+    file_path = spec_dir / "spec_plan.json"
+    
+    # Save spec_plan as JSON
+    with open(file_path, "w") as f:
+        json.dump(spec_plan, f, indent=4, default=str)
+    
+    # Return state unchanged (no saved_files tracking)
+    return state
+
+
 # ==================== Graph Construction ====================
 
 def create_orchestrator_graph():
     """Create and compile the orchestrator graph.
     
     Graph structure:
-    intent_interpreter -> save_intent -> architect -> save_architecture -> END
+    intent_interpreter -> save_intent -> architect -> save_architecture -> spec_planner -> save_spec_plan -> END
     
     Returns:
         Compiled LangGraph workflow
@@ -109,6 +146,7 @@ def create_orchestrator_graph():
     # Add nodes - use agents directly with system config
     intent_config = system_config["intent_interpreter"]
     architect_config = system_config["architect"]
+    spec_planner_config = system_config["spec_planner"]
     
     workflow.add_node(
         "intent_interpreter",
@@ -128,6 +166,15 @@ def create_orchestrator_graph():
         )
     )
     workflow.add_node("save_architecture", save_architecture_node)
+    workflow.add_node(
+        "spec_planner",
+        SpecPlannerAgent(
+            provider=spec_planner_config["provider"],
+            model=spec_planner_config["model"],
+            additional_kwargs=spec_planner_config["additional_kwargs"],
+        )
+    )
+    workflow.add_node("save_spec_plan", save_spec_plan_node)
     
     # Set entry point
     workflow.set_entry_point("intent_interpreter")
@@ -136,7 +183,9 @@ def create_orchestrator_graph():
     workflow.add_edge("intent_interpreter", "save_intent")
     workflow.add_edge("save_intent", "architect")
     workflow.add_edge("architect", "save_architecture")
-    workflow.add_edge("save_architecture", END)
+    workflow.add_edge("save_architecture", "spec_planner")
+    workflow.add_edge("spec_planner", "save_spec_plan")
+    workflow.add_edge("save_spec_plan", END)
     
     # Compile the graph
     compiled = workflow.compile(checkpointer=checkpointer)
@@ -176,6 +225,13 @@ def run_orchestrator(
         else:
             agent_registry = []
     
+    # Load layer constraints
+    layer_constraints_path = Path("src/ai/utils/layer_constraints.json")
+    layer_constraints = {}
+    if layer_constraints_path.exists():
+        with open(layer_constraints_path, "r") as f:
+            layer_constraints = json.load(f)
+    
     # Generate UUID for thread_id if app_id not provided
     thread_id = app_id if app_id is not None else str(uuid.uuid4())
     
@@ -185,6 +241,7 @@ def run_orchestrator(
         "user_feedback": user_feedback,
         "existing_intent": existing_intent,  # For MODIFY mode
         "agent_registry": agent_registry,
+        "layer_constraints": layer_constraints,
         "intent": existing_intent,  # Initial intent (will be updated by agent)
         "architecture": existing_architecture,
         "messages": [],

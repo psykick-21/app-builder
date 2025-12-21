@@ -14,9 +14,6 @@ class OrchestratorState(TypedDict, total=False):
     breaking existing functionality.
     """
     
-    # Messages list (LangGraph standard)
-    messages: Annotated[list[AnyMessage], operator.add]
-    
     # === User Input ===
     raw_user_input: Optional[str]  # For CREATE mode (initial app description)
     user_feedback: Optional[str]  # For MODIFY mode (feedback for changes)
@@ -31,5 +28,9 @@ class OrchestratorState(TypedDict, total=False):
     architecture: Optional[Dict[str, Any]]  # Architecture plan with execution layers
     existing_architecture: Optional[Dict[str, Any]]  # For ITERATIVE mode
     
+    # === Spec Planner Agent Output ===
+    spec_plan: Optional[List[Dict[str, Any]]]  # List of layer-specific execution specs
+    
     # === System Configuration ===
     agent_registry: Optional[List[Dict[str, Any]]]  # Available generator agents
+    layer_constraints: Optional[Dict[str, Any]]  # Layer constraints from layer_constraints.json
