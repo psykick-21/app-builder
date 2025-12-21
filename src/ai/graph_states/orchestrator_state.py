@@ -32,8 +32,15 @@ class OrchestratorState(TypedDict, total=False):
     # === Spec Planner Agent Output ===
     spec_plan: Optional[List[Dict[str, Any]]]  # List of layer-specific execution specs
     
+    # === Impact Analysis Output ===
+    affected_layers: Optional[List[str]]  # List of layer IDs affected by intent changes (for MODIFY mode)
+    impact_analysis_changes: Optional[Dict[str, Any]]  # Detailed changes detected during impact analysis (for MODIFY mode)
+    
     # === Code Agents Graph Output ===
     manifests: Optional[List[Dict[str, Any]]]  # Manifest of tasks/items populated by code agents
+    
+    # === Finalization ===
+    requirements_text: Optional[str]  # Requirements.txt-like text with all dependencies
     
     # === System Configuration ===
     agent_registry: Optional[List[Dict[str, Any]]]  # Available generator agents

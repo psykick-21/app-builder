@@ -5,6 +5,7 @@ import json
 from dotenv import load_dotenv
 from pathlib import Path
 from langchain_core.runnables import RunnableConfig
+from langgraph.config import get_stream_writer
 import os
 
 from ...models.code_agents.code_agent_models import ManifestFile, Manifest
@@ -105,6 +106,19 @@ class BackendServiceAgent:
         if isinstance(backend_services_spec, dict):
             backend_services_spec = BackendServicesSpec(**backend_services_spec)
         
+        # Get stream writer for custom streaming
+        writer = get_stream_writer()
+        
+        # Send custom message before execution
+        message_start = f"🔧 Starting backend service generation ({current_layer_id})..."
+        if writer:
+            writer({
+                "message": message_start,
+                "node": "backend_service_agent",
+                "status": "starting"
+            })
+        print(message_start)
+        
         # Execute the agent
         result = self.execute(
             entities=entities,
@@ -148,6 +162,16 @@ class BackendServiceAgent:
             spec=backend_services_spec.model_dump(),
             manifest_files=manifest_files,
         )
+        
+        # Send custom message after execution
+        message_complete = f"✅ Backend service generation completed ({current_layer_id})."
+        if writer:
+            writer({
+                "message": message_complete,
+                "node": "backend_service_agent",
+                "status": "completed",
+            })
+        print(message_complete)
         
         # Update state with results
         return {
