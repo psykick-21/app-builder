@@ -122,12 +122,16 @@ class BackendServiceAgent:
 
         # save files to filesystem
         for file in result.files:
-            with open(os.path.join(file_root_path, file.filename), "w") as f:
+            # Extract just the filename in case LLM returns a path
+            filename = os.path.basename(file.filename)
+            with open(os.path.join(file_root_path, filename), "w") as f:
                 f.write(file.code_content)
 
         manifest_files = []
         for file in result.files:
-            relative_file_path = os.path.join(current_layer_path, file.filename)
+            # Extract just the filename in case LLM returns a path
+            filename = os.path.basename(file.filename)
+            relative_file_path = os.path.join(current_layer_path, filename)
             
             manifest_file = ManifestFile(
                 file_path=relative_file_path,
