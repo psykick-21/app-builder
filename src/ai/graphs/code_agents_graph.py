@@ -10,6 +10,7 @@ from langchain_core.runnables import RunnableConfig
 from ..graph_states.code_agents_state import CodeAgentsState
 from ..agents.code_agents.backend_model_agent import BackendModelAgent
 from ..agents.code_agents.backend_service_agent import BackendServiceAgent
+from ..agents.code_agents.database_agent import DatabaseAgent
 from ..utils.system_config import system_config
 
 
@@ -21,7 +22,7 @@ def initialize_execution_queue(state: CodeAgentsState, config: Optional[Runnable
         raise ValueError("architecture is required in state")
     
     # Layer IDs that have implemented agents
-    implemented_layers = ["backend_models"]
+    implemented_layers = ["backend_models", "database", "backend_services"]
 
     execution_queue = [(layer["id"], layer["path"]) for layer in architecture["execution_layers"] if layer["id"] in implemented_layers]
     return {
@@ -77,13 +78,24 @@ def create_code_agents_graph():
         model=system_config["backend_model_agent"]["model"],
         additional_kwargs=system_config["backend_model_agent"]["additional_kwargs"],
     ))
+    workflow.add_node("database_agent", DatabaseAgent(
+        provider=system_config["database_agent"]["provider"],
+        model=system_config["database_agent"]["model"],
+        additional_kwargs=system_config["database_agent"]["additional_kwargs"],
+    ))
+    workflow.add_node("backend_service_agent", BackendServiceAgent(
+        provider=system_config["backend_service_agent"]["provider"],
+        model=system_config["backend_service_agent"]["model"],
+        additional_kwargs=system_config["backend_service_agent"]["additional_kwargs"],
+    ))
     
     # Add edges
     workflow.set_entry_point("initialize_execution_queue")
 
     workflow.add_conditional_edges("initialize_execution_queue", global_router)
     workflow.add_conditional_edges("backend_model_agent", global_router)
-    # workflow.add_conditional_edges("backend_service_agent", global_router)
+    workflow.add_conditional_edges("database_agent", global_router)
+    workflow.add_conditional_edges("backend_service_agent", global_router)
     # workflow.add_conditional_edges("backend_route_agent", global_router)
     # workflow.add_conditional_edges("frontend_agent", global_router)
     # workflow.add_conditional_edges("database_agent", global_router)
