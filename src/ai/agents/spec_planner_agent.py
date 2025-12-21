@@ -264,7 +264,7 @@ if __name__ == "__main__":
     with open("src/ai/utils/layer_constraints.json", "r") as f:
         layer_constraints = json.load(f)
 
-    with open("temp/test_data/orchestrator_results.json", "r") as f:
+    with open("results/orchestrator_results.json", "r") as f:
         orchestrator_results = json.load(f)
 
     spec_planner_agent = SpecPlannerAgent(
@@ -297,5 +297,6 @@ if __name__ == "__main__":
             "spec_responses": spec_responses
         })
 
-    with open("temp/test_data/spec_planner_responses.json", "w") as f:
+    os.makedirs("results", exist_ok=True)
+    with open("results/spec_planner_responses.json", "w") as f:
         json.dump(final_responses, f, indent=4)

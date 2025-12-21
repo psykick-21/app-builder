@@ -186,7 +186,7 @@ if __name__ == "__main__":
     import json
     
     # Load test data
-    with open("temp/test_data/spec_planner_responses.json", "r") as f:
+    with open("results/spec_planner_responses.json", "r") as f:
         test_data = json.load(f)
     
     # Initialize agent
@@ -254,11 +254,12 @@ if __name__ == "__main__":
             "backend_services_spec": backend_services_spec.model_dump(),
         }
         
-        with open("temp/test_data/backend_service_agent_result.json", "w") as f:
+        os.makedirs("results", exist_ok=True)
+        with open("results/backend_service_agent_result.json", "w") as f:
             json.dump(result_with_context, f, indent=4)
         
         print(f"  ✓ Test case {idx + 1} completed successfully")
-        print(f"Results saved to temp/test_data/backend_service_agent_result.json")
+        print(f"Results saved to results/backend_service_agent_result.json")
     except Exception as e:
         print(f"  ✗ Test case {idx + 1} failed: {str(e)}")
         import traceback

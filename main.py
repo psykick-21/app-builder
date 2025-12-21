@@ -4,28 +4,9 @@ import uuid
 from src.ai.graphs import create_orchestrator_graph
 from src.ai.graph_states.orchestrator_state import OrchestratorState
 import time
+import os
 
-
-# Node name mappings for user-friendly messages
-NODE_MESSAGES = {
-    "intent_interpreter": "Intent Interpreter node completed",
-    "save_intent": "Save intent node completed",
-    "architect": "Architect node completed",
-    "save_architecture": "Save architecture node completed",
-    "spec_planner": "Spec Planner node completed",
-    "save_spec_plan": "Save spec plan node completed",
-    "code_agents": "Code Agents graph completed",
-    "initialize_execution_queue": "Execution queue initialized",
-    "backend_model_agent": "Backend model agent completed",
-    "database_agent": "Database agent completed",
-    "backend_service_agent": "Backend service agent completed",
-    "backend_route_agent": "Backend route agent completed",
-    "backend_app_agent": "Backend app agent completed",
-    "frontend_agent": "Frontend agent completed",
-    "finalize": "Finalization completed",
-}
-
-
+# Helper functions
 def run_orchestrator(graph, input_dict: dict, config: dict):
     final_state = None
     for stream_mode, payload in graph.stream(
@@ -76,13 +57,15 @@ def save_result(final_state: dict):
         "impact_analysis_changes": final_state.get("impact_analysis_changes") if final_state else None,
     }
 
-    with open("temp/test_data/orchestrator_results.json", "w") as f:
+    os.makedirs("results", exist_ok=True)
+    with open("results/orchestrator_results.json", "w") as f:
         json.dump([result], f, indent=4, default=str)
+
 
 
 if __name__ == "__main__":
 
-    raw_user_input = "Create an expense tracking app. Each expense should have an amount, category, date, and optional notes. I only need this for myself, no login or multi-user support."
+    raw_user_input = input("Enter your prompt: ")
 
     # Generate UUID for thread_id if app_id not provided
     thread_id = str(uuid.uuid4())
