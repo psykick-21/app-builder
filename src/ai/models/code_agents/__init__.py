@@ -16,6 +16,10 @@ from .database_agent_models import (
     DatabaseAgentResponse,
     DatabaseAgentMetadata,
 )
+from .backend_router_agent_models import (
+    BackendRouterAgentResponse,
+    BackendRouterAgentMetadata,
+)
 
 __all__ = [
     "CodeAgentResult",
@@ -26,4 +30,6 @@ __all__ = [
     "BackendServiceAgentMetadata",
     "DatabaseAgentResponse",
     "DatabaseAgentMetadata",
+    "BackendRouterAgentResponse",
+    "BackendRouterAgentMetadata",
 ]
