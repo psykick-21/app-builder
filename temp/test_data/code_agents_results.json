@@ -1,11 +1,11 @@
 [
     {
         "intent": {
-            "app_summary": "A simple task management app to create, view, update, and delete tasks.",
+            "app_summary": "A small single-user app to track items the user needs to do each day (daily tasks) with simple create/read/update/delete functionality.",
             "app_category": "crud_app",
             "primary_entities": {
                 "Task": {
-                    "description": "A task item with a short title and an optional longer description used to track work to be done.",
+                    "description": "A daily task or item the user intends to perform each day, with optional notes and simple completion tracking.",
                     "fields": {
                         "title": {
                             "type": "string",
@@ -13,6 +13,14 @@
                         },
                         "description": {
                             "type": "string",
+                            "required": false
+                        },
+                        "completed_today": {
+                            "type": "boolean",
+                            "required": false
+                        },
+                        "last_completed": {
+                            "type": "date",
                             "required": false
                         }
                     },
@@ -35,11 +43,14 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "UI should be minimal/basic (simple form and list; no advanced styling or interactions)"
+                "Tasks represent items the user wants to do on a daily basis, but the system does not necessarily enforce complex recurrence rules (recurrence patterns are out of scope for the MVP).",
+                "Completion is tracked at a simple level (completed_today boolean and optional last_completed date) rather than full per-day history unless explicitly requested later."
             ],
             "non_goals": [
-                "No support for recurring tasks, attachments, or collaboration features",
-                "No advanced filtering, sorting, or analytics"
+                "Multi-user collaboration or user accounts",
+                "Cross-device syncing or offline sync",
+                "Built-in reminders/notifications and advanced recurrence management",
+                "Analytics or reporting dashboards"
             ]
         },
         "architecture": {
@@ -131,6 +142,18 @@
                                     "type": "str",
                                     "required": false,
                                     "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
                                 }
                             ]
                         },
@@ -148,6 +171,18 @@
                                 {
                                     "name": "description",
                                     "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
                                     "required": false,
                                     "read_only": false
                                 }
@@ -169,6 +204,18 @@
                                     "type": "str",
                                     "required": false,
                                     "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
                                 }
                             ]
                         }
@@ -186,7 +233,7 @@
                         "dependencies": [
                             "pydantic"
                         ],
-                        "summary": "Pydantic models for Task entity. Defines Task (domain model excluding DB/read-only fields), TaskCreate (input model for creating tasks with extra fields forbidden), and TaskUpdate (partial update model with extra fields forbidden). Key fields: title (str, required), description (Optional[str], optional). All create/update models set model_config = ConfigDict(extra='forbid')."
+                        "summary": "Pydantic models for Task entity. Defines three classes: Task (domain model containing all fields including id), TaskCreate (input model for creating tasks, extra fields forbidden), and TaskUpdate (input model for partial updates, extra fields forbidden). Key fields: id (int, required, system-generated), title (str, required), description (Optional[str]), completed_today (Optional[bool]), last_completed (Optional[datetime]). Create/Update models include model_config = ConfigDict(extra='forbid')."
                     }
                 ]
             },
@@ -218,6 +265,20 @@
                                     "primary_key": false,
                                     "nullable": true,
                                     "generation": null
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "INTEGER",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
                                 }
                             ]
                         }
@@ -230,7 +291,7 @@
                                     "name": "create_task",
                                     "operation": "create",
                                     "inputs": [
-                                        "TaskCreate"
+                                        "Task"
                                     ],
                                     "returns": "Task"
                                 },
@@ -277,7 +338,7 @@
                             "init_database"
                         ],
                         "dependencies": [],
-                        "summary": "Database initialization script that creates the tasks table. Defines init_database(db_path: str = 'app.db') which enables foreign keys and creates the tasks table with id (INTEGER PRIMARY KEY AUTOINCREMENT), title (TEXT NOT NULL), and description (TEXT, nullable). Uses Path to ensure directory exists. Idempotent via CREATE TABLE IF NOT EXISTS."
+                        "summary": "Database initialization script that creates the tasks table. Defines init_database(db_path: str = 'app.db') which enables PRAGMA foreign_keys, creates the tasks table with id, title, description, completed_today, and last_completed columns, and ensures the DB file directory exists."
                     },
                     {
                         "file_path": "backend/db/connection.py",
@@ -286,21 +347,20 @@
                             "get_db_connection"
                         ],
                         "dependencies": [],
-                        "summary": "SQLite connection utility. Defines get_db_connection(db_path: str = 'app.db') -> sqlite3.Connection which sets conn.row_factory = sqlite3.Row and enables PRAGMA foreign_keys = ON. Ensures parent directory exists for the database file."
+                        "summary": "Database connection utility. Defines get_db_connection(db_path: str = 'app.db') -> sqlite3.Connection which sets row_factory=sqlite3.Row and enables PRAGMA foreign_keys. Ensures directory for DB path exists."
                     },
                     {
                         "file_path": "backend/db/task_repository.py",
                         "imports": [
                             "Task",
                             "TaskCreate",
-                            "TaskUpdate",
-                            "get_db_connection"
+                            "TaskUpdate"
                         ],
                         "exports": [
                             "TaskRepository"
                         ],
                         "dependencies": [],
-                        "summary": "SQLite repository for Task entity data access. Defines TaskRepository with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Uses parameterized queries, maps sqlite3.Row to Pydantic models explicitly, manages connections with try/finally and enables foreign keys via get_db_connection."
+                        "summary": "SQLite repository for Task entity data access. Defines TaskRepository with methods: create_task(Task) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Uses backend.db.connection.get_db_connection for connections, uses parameterized queries, converts completed_today between INTEGER (0/1) and bool, and last_completed between TEXT ISO 8601 and datetime."
                     }
                 ]
             },
@@ -324,7 +384,7 @@
                                     "inputs": [
                                         "int"
                                     ],
-                                    "returns": "Task",
+                                    "returns": "Optional[Task]",
                                     "operation": "read"
                                 },
                                 {
@@ -367,7 +427,7 @@
                             "TaskService"
                         ],
                         "dependencies": [],
-                        "summary": "Business logic service for Task entity CRUD operations. Defines TaskService with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Delegates all persistence operations to TaskRepository and initializes it in __init__."
+                        "summary": "Business logic service for Task entity CRUD operations. Defines TaskService with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Delegates persistence to TaskRepository."
                     }
                 ]
             },
@@ -432,7 +492,7 @@
                         "dependencies": [
                             "fastapi"
                         ],
-                        "summary": "FastAPI router for Task entity. Exposes CRUD endpoints under prefix /tasks with tags ['tasks']. Routes: POST / (create_task using TaskCreate -> Task), GET / (list_tasks -> List[Task]), GET /{id} (get_task_by_id -> Task with 404 handling), PUT /{id} (update_task with TaskUpdate -> Task with 404 handling), DELETE /{id} (delete_task -> 204 with 404 handling). Integrates with TaskService initialized at module level; all service methods are awaited."
+                        "summary": "FastAPI router exposing CRUD endpoints for Task entity. Prefix '/tasks' and tag 'tasks'. Routes: POST /tasks -> create_task (uses TaskCreate, returns Task); GET /tasks -> list_tasks (returns List[Task]); GET /tasks/{id} -> get_task (returns Task, raises 404 if not found); PUT /tasks/{id} -> update_task (uses TaskUpdate, returns Task, raises 404 if not found); DELETE /tasks/{id} -> delete_task (204 on success, raises 404 if not found). All handlers delegate to backend.services.task_service.TaskService and await async service methods."
                     }
                 ]
             },
@@ -441,18 +501,17 @@
                 "spec": {
                     "app_type": "fastapi",
                     "routers": [
-                        "backend.routes.tasks:router"
+                        "routes.tasks_router"
                     ],
                     "middleware": [
-                        "backend.middleware.error_handler.ErrorHandlerMiddleware"
+                        "CORSMiddleware (allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])"
                     ]
                 },
                 "manifest_files": [
                     {
-                        "file_path": "backend/main.py/main.py",
+                        "file_path": "backend/main.py",
                         "imports": [
-                            "router",
-                            "ErrorHandlerMiddleware"
+                            "router"
                         ],
                         "exports": [
                             "app"
@@ -461,7 +520,85 @@
                             "fastapi",
                             "uvicorn"
                         ],
-                        "summary": "FastAPI application bootstrap. Creates a FastAPI app with title, description and version, registers ErrorHandlerMiddleware, includes the task router from backend.routes.task_routes, and exposes root and /health endpoints. Also provides a uvicorn runner in the if __name__ == '__main__' block."
+                        "summary": "Creates FastAPI app, registers task router from backend.routes.task_routes, defines root and health endpoints, runs with uvicorn on port 1234."
+                    }
+                ]
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Task",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "title",
+                                        "description",
+                                        "completed_today",
+                                        "last_completed"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "title",
+                                        "description",
+                                        "completed_today",
+                                        "last_completed"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/tasks/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "frontend/app.py",
+                        "imports": [],
+                        "exports": [
+                            "main",
+                            "list_tasks",
+                            "create_task",
+                            "edit_task",
+                            "detail_task",
+                            "delete_task"
+                        ],
+                        "dependencies": [
+                            "streamlit",
+                            "requests"
+                        ],
+                        "summary": "Streamlit UI for Task entity. Implements views: list (GET /tasks), create (POST /tasks), edit (GET /tasks/{id} + PUT /tasks/{id}), detail (GET /tasks/{id}), delete (DELETE /tasks/{id}). Uses st.session_state for navigation and selected_task_id, form handling with st.form, date handling with datetime.isoformat(), error handling for HTTP requests, and rerun to refresh views."
                     }
                 ]
             }
@@ -486,7 +623,13 @@
             [
                 "backend_app",
                 "backend/main.py"
+            ],
+            [
+                "frontend_ui",
+                "frontend"
             ]
-        ]
+        ],
+        "requirements_text": null,
+        "root_dir": "generated_apps/8c32245c-7ca8-4810-8079-6c71e27c9c0f"
     }
 ]
