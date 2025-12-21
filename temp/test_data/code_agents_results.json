@@ -1,0 +1,886 @@
+[
+    {
+        "intent": {
+            "app_summary": "A simple task management app to create, view, update, and delete tasks.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A task item with a short title and an optional longer description used to track work to be done.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "UI should be minimal/basic (simple form and list; no advanced styling or interactions)"
+            ],
+            "non_goals": [
+                "No support for recurring tasks, attachments, or collaboration features",
+                "No advanced filtering, sorting, or analytics"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            "layer_id='backend_models' spec={'models': [{'name': 'Task', 'type': 'pydantic', 'purpose': 'domain', 'fields': [{'name': 'id', 'type': 'int', 'required': True, 'read_only': True}, {'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}]}, {'name': 'TaskCreate', 'type': 'pydantic', 'purpose': 'create', 'fields': [{'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}]}, {'name': 'TaskUpdate', 'type': 'pydantic', 'purpose': 'update', 'fields': [{'name': 'title', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}]}]} manifest_files=[ManifestFile(file_path='backend/models/task.py', imports=[], exports=['Task', 'TaskCreate', 'TaskUpdate'], dependencies=['pydantic'])]"
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ]
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A small single-user app to track items the user needs to do each day (daily tasks) with simple create/read/update/delete functionality.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A daily task or item the user intends to perform each day, with optional notes and simple completion tracking.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        },
+                        "completed_today": {
+                            "type": "boolean",
+                            "required": false
+                        },
+                        "last_completed": {
+                            "type": "date",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Tasks represent items the user wants to do on a daily basis, but the system does not necessarily enforce complex recurrence rules (recurrence patterns are out of scope for the MVP).",
+                "Completion is tracked at a simple level (completed_today boolean and optional last_completed date) rather than full per-day history unless explicitly requested later."
+            ],
+            "non_goals": [
+                "Multi-user collaboration or user accounts",
+                "Cross-device syncing or offline sync",
+                "Built-in reminders/notifications and advanced recurrence management",
+                "Analytics or reporting dashboards"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            "layer_id='backend_models' spec={'models': [{'name': 'Task', 'type': 'pydantic', 'purpose': 'domain', 'fields': [{'name': 'id', 'type': 'int', 'required': True, 'read_only': True}, {'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'completed_today', 'type': 'bool', 'required': False, 'read_only': False}, {'name': 'last_completed', 'type': 'datetime', 'required': False, 'read_only': False}]}, {'name': 'TaskCreate', 'type': 'pydantic', 'purpose': 'create', 'fields': [{'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'completed_today', 'type': 'bool', 'required': False, 'read_only': False}, {'name': 'last_completed', 'type': 'datetime', 'required': False, 'read_only': False}]}, {'name': 'TaskUpdate', 'type': 'pydantic', 'purpose': 'update', 'fields': [{'name': 'title', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'completed_today', 'type': 'bool', 'required': False, 'read_only': False}, {'name': 'last_completed', 'type': 'datetime', 'required': False, 'read_only': False}]}]} manifest_files=[ManifestFile(file_path='backend/models/task.py', imports=[], exports=['Task', 'TaskCreate', 'TaskUpdate'], dependencies=['pydantic'])]"
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ]
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A single-user expense tracking app to record amounts, categories, dates, and optional notes for personal expenses.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Expense": {
+                    "description": "A single expense record capturing the monetary amount, its category, the date it occurred, and optional notes for additional context.",
+                    "fields": {
+                        "amount": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": true
+                        },
+                        "notes": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Expense": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Categories are free-form text (no predefined category list) unless user later specifies otherwise",
+                "Amounts are whole units (integer) and currency/precision handling is out of scope unless specified"
+            ],
+            "non_goals": [
+                "User accounts, authentication, or multi-user support",
+                "Currency conversion, multi-currency support, or expense reporting beyond simple listing"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            "layer_id='backend_models' spec={'models': [{'name': 'Expense', 'type': 'pydantic', 'purpose': 'domain', 'fields': [{'name': 'id', 'type': 'int', 'required': True, 'read_only': True}, {'name': 'amount', 'type': 'int', 'required': True, 'read_only': False}, {'name': 'category', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'date', 'type': 'datetime', 'required': True, 'read_only': False}, {'name': 'notes', 'type': 'str', 'required': False, 'read_only': False}]}, {'name': 'ExpenseCreate', 'type': 'pydantic', 'purpose': 'create', 'fields': [{'name': 'amount', 'type': 'int', 'required': True, 'read_only': False}, {'name': 'category', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'date', 'type': 'datetime', 'required': True, 'read_only': False}, {'name': 'notes', 'type': 'str', 'required': False, 'read_only': False}]}, {'name': 'ExpenseUpdate', 'type': 'pydantic', 'purpose': 'update', 'fields': [{'name': 'amount', 'type': 'int', 'required': False, 'read_only': False}, {'name': 'category', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'date', 'type': 'datetime', 'required': False, 'read_only': False}, {'name': 'notes', 'type': 'str', 'required': False, 'read_only': False}]}]} manifest_files=[ManifestFile(file_path='backend/models/expense.py', imports=[], exports=['Expense', 'ExpenseCreate', 'ExpenseUpdate'], dependencies=['pydantic'])]"
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ]
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A lightweight personal bug tracker for tracking bugs in the user's projects, with title, severity, status, and description for each bug.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Bug": {
+                    "description": "A bug report for a personal project containing a short title, a severity level, a current status, and a textual description.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "severity": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "status": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Bug": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Local execution",
+                "Single-user application",
+                "Open bugs are shown before closed bugs in the UI"
+            ],
+            "non_goals": []
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            "layer_id='backend_models' spec={'models': [{'name': 'Bug', 'type': 'pydantic', 'purpose': 'domain', 'fields': [{'name': 'id', 'type': 'int', 'required': True, 'read_only': True}, {'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'severity', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'status', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}]}, {'name': 'BugCreate', 'type': 'pydantic', 'purpose': 'create', 'fields': [{'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'severity', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'status', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}]}, {'name': 'BugUpdate', 'type': 'pydantic', 'purpose': 'update', 'fields': [{'name': 'title', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'severity', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'status', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}]}]} manifest_files=[ManifestFile(file_path='backend/models/bug.py', imports=[], exports=['Bug', 'BugCreate', 'BugUpdate'], dependencies=['pydantic'])]"
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ]
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A simple notes application to create, read, update, and delete notes; each note has a title and content.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Note": {
+                    "description": "A note consisting of a title and body content for user-created text entries.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "content": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Note": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution"
+            ],
+            "non_goals": []
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            "layer_id='backend_models' spec={'models': [{'name': 'Note', 'type': 'pydantic', 'purpose': 'domain', 'fields': [{'name': 'id', 'type': 'int', 'required': True, 'read_only': True}, {'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'content', 'type': 'str', 'required': True, 'read_only': False}]}, {'name': 'NoteCreate', 'type': 'pydantic', 'purpose': 'create', 'fields': [{'name': 'title', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'content', 'type': 'str', 'required': True, 'read_only': False}]}, {'name': 'NoteUpdate', 'type': 'pydantic', 'purpose': 'update', 'fields': [{'name': 'title', 'type': 'str', 'required': False, 'read_only': False}, {'name': 'content', 'type': 'str', 'required': False, 'read_only': False}]}]} manifest_files=[ManifestFile(file_path='backend/models/note.py', imports=[], exports=['Note', 'NoteCreate', 'NoteUpdate'], dependencies=['pydantic'])]"
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ]
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A backend-only REST API for creating, reading, updating, and deleting tasks.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A to-do item representing work to be completed, identified by a system-generated ID.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "no_ui",
+                "interaction_style": "no_ui"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "API-only backend with REST endpoints (no frontend/UI will be provided)",
+                "Task items require at minimum a title; additional fields (description, due date, priority) are possible extensions but not included in the MVP"
+            ],
+            "non_goals": [
+                "Providing any frontend UI",
+                "Implementing advanced features such as recurrence, rich text descriptions, or collaborative multi-user features"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": null
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            "layer_id='backend_models' spec={'models': [{'name': 'Task', 'type': 'pydantic', 'purpose': 'domain', 'fields': [{'name': 'id', 'type': 'int', 'required': True, 'read_only': True}, {'name': 'title', 'type': 'str', 'required': True, 'read_only': False}]}, {'name': 'TaskCreate', 'type': 'pydantic', 'purpose': 'create', 'fields': [{'name': 'title', 'type': 'str', 'required': True, 'read_only': False}]}, {'name': 'TaskUpdate', 'type': 'pydantic', 'purpose': 'update', 'fields': [{'name': 'title', 'type': 'str', 'required': False, 'read_only': False}]}]} manifest_files=[ManifestFile(file_path='backend/models/task.py', imports=[], exports=['Task', 'TaskCreate', 'TaskUpdate'], dependencies=['pydantic'])]"
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ]
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A read-only dashboard that displays expenses aggregated and broken down by category.",
+            "app_category": "dashboard",
+            "primary_entities": {
+                "Expense": {
+                    "description": "A recorded monetary expense with an amount, date, category, and optional description used for reporting.",
+                    "fields": {
+                        "amount": {
+                            "type": "integer",
+                            "required": true
+                        },
+                        "date": {
+                            "type": "date",
+                            "required": false
+                        },
+                        "category": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Expense": [
+                    "read"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "dashboard"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Data is provided from an external source or pre-populated; the app will not create or modify data.",
+                "Categories for expenses exist as text values on Expense entries (no separate Category entity was requested).",
+                "Aggregations (totals by category) are computed from the available Expense records at read time."
+            ],
+            "non_goals": [
+                "Creating, updating, or deleting expenses from the app",
+                "Managing categories as editable entities (no CRUD for categories)",
+                "Authentication, multi-user synchronization, or distributed data editing"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            "layer_id='backend_models' spec={'models': [{'name': 'Expense', 'type': 'pydantic', 'purpose': 'domain', 'fields': [{'name': 'id', 'type': 'int', 'required': True, 'read_only': True}, {'name': 'amount', 'type': 'int', 'required': True, 'read_only': False}, {'name': 'date', 'type': 'datetime', 'required': False, 'read_only': False}, {'name': 'category', 'type': 'str', 'required': True, 'read_only': False}, {'name': 'description', 'type': 'str', 'required': False, 'read_only': False}]}]} manifest_files=[ManifestFile(file_path='backend/models/expense.py', imports=[], exports=['Expense', 'ExpenseCreate', 'ExpenseUpdate'], dependencies=['pydantic'])]"
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ]
+        ]
+    },
+    {
+        "intent": {
+            "app_summary": "A simple browser-based notes UI that lets a user manually create and view notes; data is kept only in the frontend (no backend or APIs).",
+            "app_category": "form_app",
+            "primary_entities": {
+                "Note": {
+                    "description": "A user-created note with a short title and a body of text entered and viewed in the browser UI.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "content": {
+                            "type": "string",
+                            "required": true
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Note": [
+                    "create",
+                    "read"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "All note data is stored client-side only (no backend or API).",
+                "Data persistence across page reloads is not guaranteed unless an explicit client-side persistence mechanism (e.g., browser localStorage) is later requested."
+            ],
+            "non_goals": [
+                "Server-side persistence or APIs",
+                "User accounts or authentication",
+                "Cross-device syncing of notes"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": null,
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": []
+                }
+            ]
+        },
+        "manifests": [],
+        "execution_queue": []
+    }
+]
