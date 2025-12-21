@@ -1,0 +1,635 @@
+[
+    {
+        "intent": {
+            "app_summary": "A small single-user app to track items the user needs to do each day (daily tasks) with simple create/read/update/delete functionality.",
+            "app_category": "crud_app",
+            "primary_entities": {
+                "Task": {
+                    "description": "A daily task or item the user intends to perform each day, with optional notes and simple completion tracking.",
+                    "fields": {
+                        "title": {
+                            "type": "string",
+                            "required": true
+                        },
+                        "description": {
+                            "type": "string",
+                            "required": false
+                        },
+                        "completed_today": {
+                            "type": "boolean",
+                            "required": false
+                        },
+                        "last_completed": {
+                            "type": "date",
+                            "required": false
+                        }
+                    },
+                    "id_strategy": "auto_increment",
+                    "natural_key_field": null
+                }
+            },
+            "operations": {
+                "Task": [
+                    "create",
+                    "read",
+                    "update",
+                    "delete"
+                ]
+            },
+            "ui_expectations": {
+                "complexity": "basic",
+                "interaction_style": "form_and_list"
+            },
+            "assumptions": [
+                "Single-user application",
+                "Local execution",
+                "Tasks represent items the user wants to do on a daily basis, but the system does not necessarily enforce complex recurrence rules (recurrence patterns are out of scope for the MVP).",
+                "Completion is tracked at a simple level (completed_today boolean and optional last_completed date) rather than full per-day history unless explicitly requested later."
+            ],
+            "non_goals": [
+                "Multi-user collaboration or user accounts",
+                "Cross-device syncing or offline sync",
+                "Built-in reminders/notifications and advanced recurrence management",
+                "Analytics or reporting dashboards"
+            ]
+        },
+        "architecture": {
+            "architecture_version": "1.0",
+            "tech_stack": {
+                "backend": "fastapi",
+                "frontend": "streamlit"
+            },
+            "execution_layers": [
+                {
+                    "id": "backend_models",
+                    "type": "code_generation",
+                    "generator": "BackendModelAgent",
+                    "path": "backend/models",
+                    "depends_on": []
+                },
+                {
+                    "id": "database",
+                    "type": "code_generation",
+                    "generator": "DatabaseAgent",
+                    "path": "backend/db",
+                    "depends_on": [
+                        "backend_models"
+                    ]
+                },
+                {
+                    "id": "backend_services",
+                    "type": "code_generation",
+                    "generator": "BackendServiceAgent",
+                    "path": "backend/services",
+                    "depends_on": [
+                        "backend_models",
+                        "database"
+                    ]
+                },
+                {
+                    "id": "backend_routes",
+                    "type": "code_generation",
+                    "generator": "BackendRouteAgent",
+                    "path": "backend/routes",
+                    "depends_on": [
+                        "backend_services"
+                    ]
+                },
+                {
+                    "id": "backend_app",
+                    "type": "code_generation",
+                    "generator": "BackendAppBootstrapAgent",
+                    "path": "backend/main.py",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                },
+                {
+                    "id": "frontend_ui",
+                    "type": "code_generation",
+                    "generator": "FrontendAgent",
+                    "path": "frontend",
+                    "depends_on": [
+                        "backend_routes"
+                    ]
+                }
+            ]
+        },
+        "manifests": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Task",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "TaskUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "title",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "bool",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/models/task.py",
+                        "imports": [],
+                        "exports": [
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate"
+                        ],
+                        "dependencies": [
+                            "pydantic"
+                        ],
+                        "summary": "Pydantic models for Task entity. Defines three classes: Task (domain model containing all fields including id), TaskCreate (input model for creating tasks, extra fields forbidden), and TaskUpdate (input model for partial updates, extra fields forbidden). Key fields: id (int, required, system-generated), title (str, required), description (Optional[str]), completed_today (Optional[bool]), last_completed (Optional[datetime]). Create/Update models include model_config = ConfigDict(extra='forbid')."
+                    }
+                ]
+            },
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Task",
+                            "table_name": "tasks",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "title",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "description",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "completed_today",
+                                    "type": "INTEGER",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "last_completed",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Task",
+                            "methods": [
+                                {
+                                    "name": "create_task",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Task"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Task]"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Task]"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/db/init_db.py",
+                        "imports": [],
+                        "exports": [
+                            "init_database"
+                        ],
+                        "dependencies": [],
+                        "summary": "Database initialization script that creates the tasks table. Defines init_database(db_path: str = 'app.db') which enables PRAGMA foreign_keys, creates the tasks table with id, title, description, completed_today, and last_completed columns, and ensures the DB file directory exists."
+                    },
+                    {
+                        "file_path": "backend/db/connection.py",
+                        "imports": [],
+                        "exports": [
+                            "get_db_connection"
+                        ],
+                        "dependencies": [],
+                        "summary": "Database connection utility. Defines get_db_connection(db_path: str = 'app.db') -> sqlite3.Connection which sets row_factory=sqlite3.Row and enables PRAGMA foreign_keys. Ensures directory for DB path exists."
+                    },
+                    {
+                        "file_path": "backend/db/task_repository.py",
+                        "imports": [
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate"
+                        ],
+                        "exports": [
+                            "TaskRepository"
+                        ],
+                        "dependencies": [],
+                        "summary": "SQLite repository for Task entity data access. Defines TaskRepository with methods: create_task(Task) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Uses backend.db.connection.get_db_connection for connections, uses parameterized queries, converts completed_today between INTEGER (0/1) and bool, and last_completed between TEXT ISO 8601 and datetime."
+                    }
+                ]
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Task",
+                            "functions": [
+                                {
+                                    "name": "create_task",
+                                    "inputs": [
+                                        "TaskCreate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_task_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Task]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_tasks",
+                                    "inputs": [],
+                                    "returns": "List[Task]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_task",
+                                    "inputs": [
+                                        "int",
+                                        "TaskUpdate"
+                                    ],
+                                    "returns": "Task",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_task",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/services/task_service.py",
+                        "imports": [
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate",
+                            "TaskRepository"
+                        ],
+                        "exports": [
+                            "TaskService"
+                        ],
+                        "dependencies": [],
+                        "summary": "Business logic service for Task entity CRUD operations. Defines TaskService with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Delegates persistence to TaskRepository."
+                    }
+                ]
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/tasks",
+                            "service_call": "TaskService.create_task",
+                            "entity": "Task",
+                            "request_model": "TaskCreate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks",
+                            "service_call": "TaskService.list_tasks",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "List[Task]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.get_task_by_id",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.update_task",
+                            "entity": "Task",
+                            "request_model": "TaskUpdate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.delete_task",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/routes/task_routes.py",
+                        "imports": [
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate",
+                            "TaskService"
+                        ],
+                        "exports": [
+                            "router"
+                        ],
+                        "dependencies": [
+                            "fastapi"
+                        ],
+                        "summary": "FastAPI router exposing CRUD endpoints for Task entity. Prefix '/tasks' and tag 'tasks'. Routes: POST /tasks -> create_task (uses TaskCreate, returns Task); GET /tasks -> list_tasks (returns List[Task]); GET /tasks/{id} -> get_task (returns Task, raises 404 if not found); PUT /tasks/{id} -> update_task (uses TaskUpdate, returns Task, raises 404 if not found); DELETE /tasks/{id} -> delete_task (204 on success, raises 404 if not found). All handlers delegate to backend.services.task_service.TaskService and await async service methods."
+                    }
+                ]
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "routes.tasks_router"
+                    ],
+                    "middleware": [
+                        "CORSMiddleware (allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])"
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/main.py",
+                        "imports": [
+                            "router"
+                        ],
+                        "exports": [
+                            "app"
+                        ],
+                        "dependencies": [
+                            "fastapi",
+                            "uvicorn"
+                        ],
+                        "summary": "Creates FastAPI app, registers task router from backend.routes.task_routes, defines root and health endpoints, runs with uvicorn on port 1234."
+                    }
+                ]
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Task",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "title",
+                                        "description",
+                                        "completed_today",
+                                        "last_completed"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "title",
+                                        "description",
+                                        "completed_today",
+                                        "last_completed"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/tasks"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/tasks/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/tasks/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "frontend/app.py",
+                        "imports": [],
+                        "exports": [
+                            "main",
+                            "list_tasks",
+                            "create_task",
+                            "edit_task",
+                            "detail_task",
+                            "delete_task"
+                        ],
+                        "dependencies": [
+                            "streamlit",
+                            "requests"
+                        ],
+                        "summary": "Streamlit UI for Task entity. Implements views: list (GET /tasks), create (POST /tasks), edit (GET /tasks/{id} + PUT /tasks/{id}), detail (GET /tasks/{id}), delete (DELETE /tasks/{id}). Uses st.session_state for navigation and selected_task_id, form handling with st.form, date handling with datetime.isoformat(), error handling for HTTP requests, and rerun to refresh views."
+                    }
+                ]
+            }
+        ],
+        "execution_queue": [
+            [
+                "backend_models",
+                "backend/models"
+            ],
+            [
+                "database",
+                "backend/db"
+            ],
+            [
+                "backend_services",
+                "backend/services"
+            ],
+            [
+                "backend_routes",
+                "backend/routes"
+            ],
+            [
+                "backend_app",
+                "backend/main.py"
+            ],
+            [
+                "frontend_ui",
+                "frontend"
+            ]
+        ],
+        "requirements_text": null,
+        "root_dir": "generated_apps/8c32245c-7ca8-4810-8079-6c71e27c9c0f"
+    }
+]

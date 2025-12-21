@@ -1,0 +1,35 @@
+"""Code agent prompts."""
+
+from .backend_model_agent_prompts import (
+    BACKEND_MODEL_AGENT_SYSTEM_PROMPT,
+    BACKEND_MODEL_AGENT_PROMPT,
+)
+from .backend_service_agent_prompts import (
+    BACKEND_SERVICE_AGENT_SYSTEM_PROMPT,
+    BACKEND_SERVICE_AGENT_PROMPT,
+)
+from .database_agent_prompts import (
+    DATABASE_AGENT_SYSTEM_PROMPT,
+    DATABASE_AGENT_PROMPT,
+)
+from .backend_router_agent_prompts import (
+    BACKEND_ROUTER_AGENT_SYSTEM_PROMPT,
+    BACKEND_ROUTER_AGENT_PROMPT,
+)
+from .backend_app_agent_prompts import (
+    BACKEND_APP_AGENT_SYSTEM_PROMPT,
+    BACKEND_APP_AGENT_PROMPT,
+)
+
+__all__ = [
+    "BACKEND_MODEL_AGENT_SYSTEM_PROMPT",
+    "BACKEND_MODEL_AGENT_PROMPT",
+    "BACKEND_SERVICE_AGENT_SYSTEM_PROMPT",
+    "BACKEND_SERVICE_AGENT_PROMPT",
+    "DATABASE_AGENT_SYSTEM_PROMPT",
+    "DATABASE_AGENT_PROMPT",
+    "BACKEND_ROUTER_AGENT_SYSTEM_PROMPT",
+    "BACKEND_ROUTER_AGENT_PROMPT",
+    "BACKEND_APP_AGENT_SYSTEM_PROMPT",
+    "BACKEND_APP_AGENT_PROMPT",
+]

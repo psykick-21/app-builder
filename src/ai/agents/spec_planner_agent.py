@@ -129,46 +129,58 @@ class SpecPlannerAgent:
         """LangGraph node interface.
         
         Args:
-            state: Current workflow state containing intent, architecture, layer_id, and layer_constraints
+            state: Current workflow state containing intent, architecture, and layer_constraints
             config: Optional runtime configuration
             
         Returns:
-            Updated state with layer_spec
+            Updated state with spec_plan (list of all layer specs)
         """
         # Extract inputs from state
         intent = state.get("intent")
         architecture = state.get("architecture")
-        layer_id = state.get("layer_id")
         layer_constraints = state.get("layer_constraints")
         
         if not intent:
             raise ValueError("intent is required in state")
         if not architecture:
             raise ValueError("architecture is required in state")
-        if not layer_id:
-            raise ValueError("layer_id is required in state")
         if not layer_constraints:
             raise ValueError("layer_constraints is required in state")
         
-        # Execute the agent
-        response = self.execute(
-            intent=intent,
-            architecture=architecture,
-            layer_id=layer_id,
-            layer_constraints=layer_constraints
-        )
+        # Get all execution layers from architecture
+        execution_layers = architecture.get("execution_layers", [])
+        if not execution_layers:
+            raise ValueError("architecture must contain at least one execution layer")
         
-        # Validate response
-        if not isinstance(response, BaseModel):
-            raise ValueError(f"Unexpected response type: {type(response)}")
-        
-        # Update state with results - wrap in dict with layer_id
-        return {
-            **state,
-            "layer_spec": {
+        # Execute the agent for each layer
+        spec_plan = []
+        for layer in execution_layers:
+            layer_id = layer.get("id")
+            if not layer_id:
+                raise ValueError(f"Layer missing 'id' field: {layer}")
+            
+            # Execute for this layer
+            response = self.execute(
+                intent=intent,
+                architecture=architecture,
+                layer_id=layer_id,
+                layer_constraints=layer_constraints
+            )
+            
+            # Validate response
+            if not isinstance(response, BaseModel):
+                raise ValueError(f"Unexpected response type for layer '{layer_id}': {type(response)}")
+            
+            # Collect the result
+            spec_plan.append({
                 "layer_id": layer_id,
                 "spec": response.model_dump(),
-            },
+            })
+        
+        # Update state with all layer specs
+        return {
+            **state,
+            "spec_plan": spec_plan,
         }
 
 

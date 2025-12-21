@@ -1,271 +1,50 @@
 [
     {
-        "prompt": "Build a simple task management app. I should be able to create, view, update, and delete tasks. Each task should have a title and a description. Keep the UI very basic.",
-        "intent": {
-            "app_summary": "A simple task management app to create, view, update, and delete tasks.",
-            "app_category": "crud_app",
-            "primary_entities": {
-                "Task": {
-                    "description": "A task item with a short title and an optional longer description used to track work to be done.",
-                    "fields": {
-                        "title": {
-                            "type": "string",
-                            "required": true
-                        },
-                        "description": {
-                            "type": "string",
-                            "required": false
-                        }
-                    },
-                    "id_strategy": "auto_increment",
-                    "natural_key_field": null
-                }
-            },
-            "operations": {
-                "Task": [
-                    "create",
-                    "read",
-                    "update",
-                    "delete"
-                ]
-            },
-            "ui_expectations": {
-                "complexity": "basic",
-                "interaction_style": "form_and_list"
-            },
-            "assumptions": [
-                "Single-user application",
-                "Local execution",
-                "UI should be minimal/basic (simple form and list; no advanced styling or interactions)"
-            ],
-            "non_goals": [
-                "No support for recurring tasks, attachments, or collaboration features",
-                "No advanced filtering, sorting, or analytics"
-            ]
-        },
-        "mode": "CREATE",
-        "change_summary": "Created an initial intent for a basic CRUD task management app with a single Task entity (title and description) and simple form-and-list UI.",
-        "architecture": {
-            "architecture_version": "1.0",
-            "tech_stack": {
-                "backend": "fastapi",
-                "frontend": "streamlit"
-            },
-            "execution_layers": [
-                {
-                    "id": "backend_models",
-                    "type": "code_generation",
-                    "generator": "BackendModelAgent",
-                    "path": "backend/models",
-                    "depends_on": []
-                },
-                {
-                    "id": "database",
-                    "type": "code_generation",
-                    "generator": "DatabaseAgent",
-                    "path": "backend/db",
-                    "depends_on": [
-                        "backend_models"
-                    ]
-                },
-                {
-                    "id": "backend_services",
-                    "type": "code_generation",
-                    "generator": "BackendServiceAgent",
-                    "path": "backend/services",
-                    "depends_on": [
-                        "backend_models",
-                        "database"
-                    ]
-                },
-                {
-                    "id": "backend_routes",
-                    "type": "code_generation",
-                    "generator": "BackendRouteAgent",
-                    "path": "backend/routes",
-                    "depends_on": [
-                        "backend_services"
-                    ]
-                },
-                {
-                    "id": "backend_app",
-                    "type": "code_generation",
-                    "generator": "BackendAppBootstrapAgent",
-                    "path": "backend/main.py",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                },
-                {
-                    "id": "frontend_ui",
-                    "type": "code_generation",
-                    "generator": "FrontendAgent",
-                    "path": "frontend",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                }
-            ]
-        }
-    },
-    {
-        "prompt": "I want a small app to track things I need to do daily.",
-        "intent": {
-            "app_summary": "A small single-user app to track items the user needs to do each day (daily tasks) with simple create/read/update/delete functionality.",
-            "app_category": "crud_app",
-            "primary_entities": {
-                "Task": {
-                    "description": "A daily task or item the user intends to perform each day, with optional notes and simple completion tracking.",
-                    "fields": {
-                        "title": {
-                            "type": "string",
-                            "required": true
-                        },
-                        "description": {
-                            "type": "string",
-                            "required": false
-                        },
-                        "completed_today": {
-                            "type": "boolean",
-                            "required": false
-                        },
-                        "last_completed": {
-                            "type": "date",
-                            "required": false
-                        }
-                    },
-                    "id_strategy": "auto_increment",
-                    "natural_key_field": null
-                }
-            },
-            "operations": {
-                "Task": [
-                    "create",
-                    "read",
-                    "update",
-                    "delete"
-                ]
-            },
-            "ui_expectations": {
-                "complexity": "basic",
-                "interaction_style": "form_and_list"
-            },
-            "assumptions": [
-                "Single-user application",
-                "Local execution",
-                "Tasks represent items the user wants to do on a daily basis, but the system does not necessarily enforce complex recurrence rules (recurrence patterns are out of scope for the MVP).",
-                "Completion is tracked at a simple level (completed_today boolean and optional last_completed date) rather than full per-day history unless explicitly requested later."
-            ],
-            "non_goals": [
-                "Multi-user collaboration or user accounts",
-                "Cross-device syncing or offline sync",
-                "Built-in reminders/notifications and advanced recurrence management",
-                "Analytics or reporting dashboards"
-            ]
-        },
-        "mode": "CREATE",
-        "change_summary": "Created initial intent for a simple daily task tracking CRUD app with a Task entity, basic fields (title, description, completed_today, last_completed), auto-increment IDs, and standard CRUD operations. UI set as basic form-and-list; assumptions and non-goals listed.",
-        "architecture": {
-            "architecture_version": "1.0",
-            "tech_stack": {
-                "backend": "fastapi",
-                "frontend": "streamlit"
-            },
-            "execution_layers": [
-                {
-                    "id": "backend_models",
-                    "type": "code_generation",
-                    "generator": "BackendModelAgent",
-                    "path": "backend/models",
-                    "depends_on": []
-                },
-                {
-                    "id": "database",
-                    "type": "code_generation",
-                    "generator": "DatabaseAgent",
-                    "path": "backend/db",
-                    "depends_on": [
-                        "backend_models"
-                    ]
-                },
-                {
-                    "id": "backend_services",
-                    "type": "code_generation",
-                    "generator": "BackendServiceAgent",
-                    "path": "backend/services",
-                    "depends_on": [
-                        "backend_models",
-                        "database"
-                    ]
-                },
-                {
-                    "id": "backend_routes",
-                    "type": "code_generation",
-                    "generator": "BackendRouteAgent",
-                    "path": "backend/routes",
-                    "depends_on": [
-                        "backend_services"
-                    ]
-                },
-                {
-                    "id": "backend_app",
-                    "type": "code_generation",
-                    "generator": "BackendAppBootstrapAgent",
-                    "path": "backend/main.py",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                },
-                {
-                    "id": "frontend_ui",
-                    "type": "code_generation",
-                    "generator": "FrontendAgent",
-                    "path": "frontend",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                }
-            ]
-        }
-    },
-    {
         "prompt": "Create an expense tracking app. Each expense should have an amount, category, date, and optional notes. I only need this for myself, no login or multi-user support.",
         "intent": {
-            "app_summary": "A single-user expense tracking app to record amounts, categories, dates, and optional notes for personal expenses.",
+            "app_summary": "A simple personal expense tracking app to record individual expenses with amount, category, date, and optional notes.",
             "app_category": "crud_app",
-            "primary_entities": {
-                "Expense": {
-                    "description": "A single expense record capturing the monetary amount, its category, the date it occurred, and optional notes for additional context.",
-                    "fields": {
-                        "amount": {
+            "primary_entities": [
+                {
+                    "name": "Expense",
+                    "description": "A single expense record capturing the monetary amount, category, date of the expense, and optional notes for context.",
+                    "fields": [
+                        {
+                            "name": "amount",
                             "type": "integer",
                             "required": true
                         },
-                        "category": {
+                        {
+                            "name": "category",
                             "type": "string",
                             "required": true
                         },
-                        "date": {
+                        {
+                            "name": "date",
                             "type": "date",
                             "required": true
                         },
-                        "notes": {
+                        {
+                            "name": "notes",
                             "type": "string",
                             "required": false
                         }
-                    },
+                    ],
                     "id_strategy": "auto_increment",
                     "natural_key_field": null
                 }
-            },
-            "operations": {
-                "Expense": [
-                    "create",
-                    "read",
-                    "update",
-                    "delete"
-                ]
-            },
+            ],
+            "operations": [
+                {
+                    "entity_name": "Expense",
+                    "operations": [
+                        "create",
+                        "read",
+                        "update",
+                        "delete"
+                    ]
+                }
+            ],
             "ui_expectations": {
                 "complexity": "basic",
                 "interaction_style": "form_and_list"
@@ -273,16 +52,15 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "Categories are free-form text (no predefined category list) unless user later specifies otherwise",
-                "Amounts are whole units (integer) and currency/precision handling is out of scope unless specified"
+                "Amounts are stored as integers because decimal currency precision was not specified; this implies using the smallest currency unit (e.g., cents) if needed.",
+                "Category is a free-text string by default; the user did not request predefined category lists or tagging."
             ],
             "non_goals": [
-                "User accounts, authentication, or multi-user support",
-                "Currency conversion, multi-currency support, or expense reporting beyond simple listing"
+                "Authentication or multi-user support (explicitly excluded by the user)"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Created initial intent for a single-user expense tracker with one entity 'Expense' (amount, category, date, notes), full CRUD operations, basic form-and-list UI, and default auto_increment IDs.",
+        "change_summary": "Initial intent: defined a single Expense entity with amount, category, date, optional notes; CRUD operations enabled; single-user local app.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -344,502 +122,866 @@
                     ]
                 }
             ]
-        }
-    },
-    {
-        "prompt": "Build a lightweight bug tracker for my personal projects. Each bug should have a title, severity, status, and description. I want to see all open bugs first.",
-        "intent": {
-            "app_summary": "A lightweight personal bug tracker for tracking bugs in the user's projects, with title, severity, status, and description for each bug.",
-            "app_category": "crud_app",
-            "primary_entities": {
-                "Bug": {
-                    "description": "A bug report for a personal project containing a short title, a severity level, a current status, and a textual description.",
-                    "fields": {
-                        "title": {
-                            "type": "string",
-                            "required": true
+        },
+        "spec_plan": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Expense",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
                         },
-                        "severity": {
-                            "type": "string",
-                            "required": true
+                        {
+                            "name": "ExpenseCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
                         },
-                        "status": {
-                            "type": "string",
-                            "required": true
-                        },
-                        "description": {
-                            "type": "string",
-                            "required": false
+                        {
+                            "name": "ExpenseUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
                         }
-                    },
-                    "id_strategy": "auto_increment",
-                    "natural_key_field": null
+                    ]
                 }
             },
-            "operations": {
-                "Bug": [
-                    "create",
-                    "read",
-                    "update",
-                    "delete"
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Expense",
+                            "table_name": "expenses",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "INTEGER",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
+                        }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Expense",
+                            "methods": [
+                                {
+                                    "name": "create_expense",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Expense"
+                                    ],
+                                    "returns": "Expense"
+                                },
+                                {
+                                    "name": "get_expense_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Expense]"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Expense]"
+                                },
+                                {
+                                    "name": "update_expense",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "ExpenseUpdate"
+                                    ],
+                                    "returns": "Expense"
+                                },
+                                {
+                                    "name": "delete_expense",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Expense",
+                            "functions": [
+                                {
+                                    "name": "create_expense",
+                                    "inputs": [
+                                        "ExpenseCreate"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_expense_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "inputs": [],
+                                    "returns": "List[Expense]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_expense",
+                                    "inputs": [
+                                        "int",
+                                        "ExpenseUpdate"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_expense",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/expenses",
+                            "service_call": "ExpenseService.create_expense",
+                            "entity": "Expense",
+                            "request_model": "ExpenseCreate",
+                            "response_model": "Expense"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/expenses",
+                            "service_call": "ExpenseService.list_expenses",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "List[Expense]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.get_expense_by_id",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "Expense"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.update_expense",
+                            "entity": "Expense",
+                            "request_model": "ExpenseUpdate",
+                            "response_model": "Expense"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.delete_expense",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                }
+            },
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.expense"
+                    ],
+                    "middleware": [
+                        "fastapi.middleware.cors.CORSMiddleware"
+                    ]
+                }
+            },
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Expense",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "amount",
+                                        "category",
+                                        "date",
+                                        "notes"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "amount",
+                                        "category",
+                                        "date",
+                                        "notes"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/expenses"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/expenses/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/expenses/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ],
+        "manifests": [
+            {
+                "layer_id": "backend_models",
+                "spec": {
+                    "models": [
+                        {
+                            "name": "Expense",
+                            "type": "pydantic",
+                            "purpose": "domain",
+                            "fields": [
+                                {
+                                    "name": "id",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": true
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "ExpenseCreate",
+                            "type": "pydantic",
+                            "purpose": "create",
+                            "fields": [
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": true,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        },
+                        {
+                            "name": "ExpenseUpdate",
+                            "type": "pydantic",
+                            "purpose": "update",
+                            "fields": [
+                                {
+                                    "name": "amount",
+                                    "type": "int",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "datetime",
+                                    "required": false,
+                                    "read_only": false
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "str",
+                                    "required": false,
+                                    "read_only": false
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/models/expense.py",
+                        "imports": [],
+                        "exports": [
+                            "Expense",
+                            "ExpenseCreate",
+                            "ExpenseUpdate"
+                        ],
+                        "dependencies": [
+                            "pydantic"
+                        ],
+                        "summary": "Pydantic models for Expense entity. Defines three classes: Expense (domain model with all fields including id), ExpenseCreate (input model for creating expenses; excludes id; extra fields forbidden), and ExpenseUpdate (input model for partial updates; all fields optional; extra fields forbidden). Key fields: id (int, required in domain), amount (int, required), category (str, required), date (datetime, required), notes (Optional[str], optional)."
+                    }
                 ]
             },
-            "ui_expectations": {
-                "complexity": "basic",
-                "interaction_style": "form_and_list"
-            },
-            "assumptions": [
-                "Local execution",
-                "Single-user application",
-                "Open bugs are shown before closed bugs in the UI"
-            ],
-            "non_goals": []
-        },
-        "mode": "CREATE",
-        "change_summary": "Initial intent specification for a lightweight personal bug tracker.",
-        "architecture": {
-            "architecture_version": "1.0",
-            "tech_stack": {
-                "backend": "fastapi",
-                "frontend": "streamlit"
-            },
-            "execution_layers": [
-                {
-                    "id": "backend_models",
-                    "type": "code_generation",
-                    "generator": "BackendModelAgent",
-                    "path": "backend/models",
-                    "depends_on": []
-                },
-                {
-                    "id": "database",
-                    "type": "code_generation",
-                    "generator": "DatabaseAgent",
-                    "path": "backend/db",
-                    "depends_on": [
-                        "backend_models"
-                    ]
-                },
-                {
-                    "id": "backend_services",
-                    "type": "code_generation",
-                    "generator": "BackendServiceAgent",
-                    "path": "backend/services",
-                    "depends_on": [
-                        "backend_models",
-                        "database"
-                    ]
-                },
-                {
-                    "id": "backend_routes",
-                    "type": "code_generation",
-                    "generator": "BackendRouteAgent",
-                    "path": "backend/routes",
-                    "depends_on": [
-                        "backend_services"
-                    ]
-                },
-                {
-                    "id": "backend_app",
-                    "type": "code_generation",
-                    "generator": "BackendAppBootstrapAgent",
-                    "path": "backend/main.py",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                },
-                {
-                    "id": "frontend_ui",
-                    "type": "code_generation",
-                    "generator": "FrontendAgent",
-                    "path": "frontend",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                }
-            ]
-        }
-    },
-    {
-        "prompt": "Build a notes app where I can create, edit, and delete notes. Each note should have a title and content.",
-        "intent": {
-            "app_summary": "A simple notes application to create, read, update, and delete notes; each note has a title and content.",
-            "app_category": "crud_app",
-            "primary_entities": {
-                "Note": {
-                    "description": "A note consisting of a title and body content for user-created text entries.",
-                    "fields": {
-                        "title": {
-                            "type": "string",
-                            "required": true
-                        },
-                        "content": {
-                            "type": "string",
-                            "required": true
+            {
+                "layer_id": "database",
+                "spec": {
+                    "tables": [
+                        {
+                            "entity": "Expense",
+                            "table_name": "expenses",
+                            "columns": [
+                                {
+                                    "name": "id",
+                                    "type": "INTEGER",
+                                    "primary_key": true,
+                                    "nullable": false,
+                                    "generation": "auto_increment"
+                                },
+                                {
+                                    "name": "amount",
+                                    "type": "INTEGER",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "category",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "date",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": false,
+                                    "generation": null
+                                },
+                                {
+                                    "name": "notes",
+                                    "type": "TEXT",
+                                    "primary_key": false,
+                                    "nullable": true,
+                                    "generation": null
+                                }
+                            ]
                         }
+                    ],
+                    "repositories": [
+                        {
+                            "entity": "Expense",
+                            "methods": [
+                                {
+                                    "name": "create_expense",
+                                    "operation": "create",
+                                    "inputs": [
+                                        "Expense"
+                                    ],
+                                    "returns": "Expense"
+                                },
+                                {
+                                    "name": "get_expense_by_id",
+                                    "operation": "read",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Optional[Expense]"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "operation": "read",
+                                    "inputs": [],
+                                    "returns": "List[Expense]"
+                                },
+                                {
+                                    "name": "update_expense",
+                                    "operation": "update",
+                                    "inputs": [
+                                        "int",
+                                        "ExpenseUpdate"
+                                    ],
+                                    "returns": "Expense"
+                                },
+                                {
+                                    "name": "delete_expense",
+                                    "operation": "delete",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/db/init_db.py",
+                        "imports": [],
+                        "exports": [
+                            "init_database"
+                        ],
+                        "dependencies": [],
+                        "summary": "Database initialization for SQLite. Defines init_database(db_path: str = 'app.db') which creates the 'expenses' table with columns id (PK AUTOINCREMENT), amount (INTEGER NOT NULL), category (TEXT NOT NULL), date (TEXT NOT NULL, stores ISO 8601 datetime), and notes (TEXT, nullable). Enables PRAGMA foreign_keys and ensures connection cleanup with try/finally."
                     },
-                    "id_strategy": "auto_increment",
-                    "natural_key_field": null
-                }
-            },
-            "operations": {
-                "Note": [
-                    "create",
-                    "read",
-                    "update",
-                    "delete"
+                    {
+                        "file_path": "backend/db/connection.py",
+                        "imports": [],
+                        "exports": [
+                            "get_db_connection"
+                        ],
+                        "dependencies": [],
+                        "summary": "Database connection utility. Provides get_db_connection(db_path: str = 'app.db') -> sqlite3.Connection with conn.row_factory set to sqlite3.Row and PRAGMA foreign_keys = ON. Connections must be closed by caller (use try/finally)."
+                    },
+                    {
+                        "file_path": "backend/db/expense_repository.py",
+                        "imports": [
+                            "Expense",
+                            "ExpenseCreate",
+                            "ExpenseUpdate"
+                        ],
+                        "exports": [
+                            "ExpenseRepository"
+                        ],
+                        "dependencies": [],
+                        "summary": "SQLite repository for Expense entity data access. Defines ExpenseRepository with methods: create_expense(ExpenseCreate) -> Expense, get_expense_by_id(int) -> Optional[Expense], list_expenses() -> List[Expense], update_expense(int, ExpenseUpdate) -> Expense, delete_expense(int) -> None. Uses backend.db.connection.get_db_connection, stores datetime fields as ISO 8601 TEXT, and maps rows to backend.models.expense Pydantic models. All DB operations use parameterized queries and ensure connections are closed with try/finally."
+                    }
                 ]
             },
-            "ui_expectations": {
-                "complexity": "basic",
-                "interaction_style": "form_and_list"
-            },
-            "assumptions": [
-                "Single-user application",
-                "Local execution"
-            ],
-            "non_goals": []
-        },
-        "mode": "CREATE",
-        "change_summary": "Initial intent created for a basic CRUD notes app with a Note entity having title and content.",
-        "architecture": {
-            "architecture_version": "1.0",
-            "tech_stack": {
-                "backend": "fastapi",
-                "frontend": "streamlit"
-            },
-            "execution_layers": [
-                {
-                    "id": "backend_models",
-                    "type": "code_generation",
-                    "generator": "BackendModelAgent",
-                    "path": "backend/models",
-                    "depends_on": []
-                },
-                {
-                    "id": "database",
-                    "type": "code_generation",
-                    "generator": "DatabaseAgent",
-                    "path": "backend/db",
-                    "depends_on": [
-                        "backend_models"
-                    ]
-                },
-                {
-                    "id": "backend_services",
-                    "type": "code_generation",
-                    "generator": "BackendServiceAgent",
-                    "path": "backend/services",
-                    "depends_on": [
-                        "backend_models",
-                        "database"
-                    ]
-                },
-                {
-                    "id": "backend_routes",
-                    "type": "code_generation",
-                    "generator": "BackendRouteAgent",
-                    "path": "backend/routes",
-                    "depends_on": [
-                        "backend_services"
-                    ]
-                },
-                {
-                    "id": "backend_app",
-                    "type": "code_generation",
-                    "generator": "BackendAppBootstrapAgent",
-                    "path": "backend/main.py",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                },
-                {
-                    "id": "frontend_ui",
-                    "type": "code_generation",
-                    "generator": "FrontendAgent",
-                    "path": "frontend",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                }
-            ]
-        }
-    },
-    {
-        "prompt": "Build a backend-only API for managing tasks. I don't need any UI. I just want REST endpoints to create, update, list, and delete tasks.",
-        "intent": {
-            "app_summary": "A backend-only REST API for creating, reading, updating, and deleting tasks.",
-            "app_category": "crud_app",
-            "primary_entities": {
-                "Task": {
-                    "description": "A to-do item representing work to be completed, identified by a system-generated ID.",
-                    "fields": {
-                        "title": {
-                            "type": "string",
-                            "required": true
+            {
+                "layer_id": "backend_services",
+                "spec": {
+                    "services": [
+                        {
+                            "entity": "Expense",
+                            "functions": [
+                                {
+                                    "name": "create_expense",
+                                    "inputs": [
+                                        "ExpenseCreate"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "create"
+                                },
+                                {
+                                    "name": "get_expense_by_id",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "list_expenses",
+                                    "inputs": [],
+                                    "returns": "List[Expense]",
+                                    "operation": "read"
+                                },
+                                {
+                                    "name": "update_expense",
+                                    "inputs": [
+                                        "int",
+                                        "ExpenseUpdate"
+                                    ],
+                                    "returns": "Expense",
+                                    "operation": "update"
+                                },
+                                {
+                                    "name": "delete_expense",
+                                    "inputs": [
+                                        "int"
+                                    ],
+                                    "returns": "None",
+                                    "operation": "delete"
+                                }
+                            ]
                         }
-                    },
-                    "id_strategy": "auto_increment",
-                    "natural_key_field": null
-                }
-            },
-            "operations": {
-                "Task": [
-                    "create",
-                    "read",
-                    "update",
-                    "delete"
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/services/expense_service.py",
+                        "imports": [
+                            "Expense",
+                            "ExpenseCreate",
+                            "ExpenseUpdate",
+                            "ExpenseRepository"
+                        ],
+                        "exports": [
+                            "ExpenseService"
+                        ],
+                        "dependencies": [],
+                        "summary": "Business logic service for Expense entity CRUD operations. Defines ExpenseService with methods: create_expense(ExpenseCreate) -> Expense, get_expense_by_id(int) -> Optional[Expense], list_expenses() -> List[Expense], update_expense(int, ExpenseUpdate) -> Optional[Expense], delete_expense(int) -> None. Delegates persistence operations to ExpenseRepository from backend.db.expense_repository."
+                    }
                 ]
             },
-            "ui_expectations": {
-                "complexity": "no_ui",
-                "interaction_style": "no_ui"
-            },
-            "assumptions": [
-                "Single-user application",
-                "Local execution",
-                "API-only backend with REST endpoints (no frontend/UI will be provided)",
-                "Task items require at minimum a title; additional fields (description, due date, priority) are possible extensions but not included in the MVP"
-            ],
-            "non_goals": [
-                "Providing any frontend UI",
-                "Implementing advanced features such as recurrence, rich text descriptions, or collaborative multi-user features"
-            ]
-        },
-        "mode": "CREATE",
-        "change_summary": "Created an intent for a backend-only REST CRUD API managing a single Task entity with a required title field and auto-increment IDs.",
-        "architecture": {
-            "architecture_version": "1.0",
-            "tech_stack": {
-                "backend": "fastapi",
-                "frontend": null
-            },
-            "execution_layers": [
-                {
-                    "id": "backend_models",
-                    "type": "code_generation",
-                    "generator": "BackendModelAgent",
-                    "path": "backend/models",
-                    "depends_on": []
-                },
-                {
-                    "id": "database",
-                    "type": "code_generation",
-                    "generator": "DatabaseAgent",
-                    "path": "backend/db",
-                    "depends_on": [
-                        "backend_models"
-                    ]
-                },
-                {
-                    "id": "backend_services",
-                    "type": "code_generation",
-                    "generator": "BackendServiceAgent",
-                    "path": "backend/services",
-                    "depends_on": [
-                        "backend_models",
-                        "database"
-                    ]
-                },
-                {
-                    "id": "backend_routes",
-                    "type": "code_generation",
-                    "generator": "BackendRouteAgent",
-                    "path": "backend/routes",
-                    "depends_on": [
-                        "backend_services"
-                    ]
-                },
-                {
-                    "id": "backend_app",
-                    "type": "code_generation",
-                    "generator": "BackendAppBootstrapAgent",
-                    "path": "backend/main.py",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                }
-            ]
-        }
-    },
-    {
-        "prompt": "Build a read-only dashboard that shows expenses by category. I don't want to create or edit data from the app \u2014 just view it.",
-        "intent": {
-            "app_summary": "A read-only dashboard that displays expenses aggregated and broken down by category.",
-            "app_category": "dashboard",
-            "primary_entities": {
-                "Expense": {
-                    "description": "A recorded monetary expense with an amount, date, category, and optional description used for reporting.",
-                    "fields": {
-                        "amount": {
-                            "type": "integer",
-                            "required": true
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/expenses",
+                            "service_call": "ExpenseService.create_expense",
+                            "entity": "Expense",
+                            "request_model": "ExpenseCreate",
+                            "response_model": "Expense"
                         },
-                        "date": {
-                            "type": "date",
-                            "required": false
+                        {
+                            "method": "GET",
+                            "path": "/expenses",
+                            "service_call": "ExpenseService.list_expenses",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "List[Expense]"
                         },
-                        "category": {
-                            "type": "string",
-                            "required": true
+                        {
+                            "method": "GET",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.get_expense_by_id",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "Expense"
                         },
-                        "description": {
-                            "type": "string",
-                            "required": false
+                        {
+                            "method": "PUT",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.update_expense",
+                            "entity": "Expense",
+                            "request_model": "ExpenseUpdate",
+                            "response_model": "Expense"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/expenses/{id}",
+                            "service_call": "ExpenseService.delete_expense",
+                            "entity": "Expense",
+                            "request_model": null,
+                            "response_model": "None"
                         }
-                    },
-                    "id_strategy": "auto_increment",
-                    "natural_key_field": null
-                }
-            },
-            "operations": {
-                "Expense": [
-                    "read"
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/routes/expense_routes.py",
+                        "imports": [
+                            "Expense",
+                            "ExpenseCreate",
+                            "ExpenseUpdate",
+                            "ExpenseService"
+                        ],
+                        "exports": [
+                            "router"
+                        ],
+                        "dependencies": [
+                            "fastapi"
+                        ],
+                        "summary": "FastAPI router for Expense entity. Exposes endpoints under prefix /expenses with CRUD routes: POST / (create_expense), GET / (list_expenses), GET /{id} (get_expense), PUT /{id} (update_expense), DELETE /{id} (delete_expense). Integrates with backend.services.expense_service.ExpenseService (initialized as expense_service) and uses Pydantic models from backend.models.expense (Expense, ExpenseCreate, ExpenseUpdate) for request validation and response models."
+                    }
                 ]
             },
-            "ui_expectations": {
-                "complexity": "basic",
-                "interaction_style": "dashboard"
-            },
-            "assumptions": [
-                "Single-user application",
-                "Local execution",
-                "Data is provided from an external source or pre-populated; the app will not create or modify data.",
-                "Categories for expenses exist as text values on Expense entries (no separate Category entity was requested).",
-                "Aggregations (totals by category) are computed from the available Expense records at read time."
-            ],
-            "non_goals": [
-                "Creating, updating, or deleting expenses from the app",
-                "Managing categories as editable entities (no CRUD for categories)",
-                "Authentication, multi-user synchronization, or distributed data editing"
-            ]
-        },
-        "mode": "CREATE",
-        "change_summary": "Created an intent for a read-only expenses dashboard centered on an Expense entity with read-only operations and dashboard UI expectations.",
-        "architecture": {
-            "architecture_version": "1.0",
-            "tech_stack": {
-                "backend": "fastapi",
-                "frontend": "streamlit"
-            },
-            "execution_layers": [
-                {
-                    "id": "backend_models",
-                    "type": "code_generation",
-                    "generator": "BackendModelAgent",
-                    "path": "backend/models",
-                    "depends_on": []
-                },
-                {
-                    "id": "database",
-                    "type": "code_generation",
-                    "generator": "DatabaseAgent",
-                    "path": "backend/db",
-                    "depends_on": [
-                        "backend_models"
+            {
+                "layer_id": "backend_app",
+                "spec": {
+                    "app_type": "fastapi",
+                    "routers": [
+                        "backend.routes.expense"
+                    ],
+                    "middleware": [
+                        "fastapi.middleware.cors.CORSMiddleware"
                     ]
                 },
-                {
-                    "id": "backend_services",
-                    "type": "code_generation",
-                    "generator": "BackendServiceAgent",
-                    "path": "backend/services",
-                    "depends_on": [
-                        "backend_models",
-                        "database"
-                    ]
-                },
-                {
-                    "id": "backend_routes",
-                    "type": "code_generation",
-                    "generator": "BackendRouteAgent",
-                    "path": "backend/routes",
-                    "depends_on": [
-                        "backend_services"
-                    ]
-                },
-                {
-                    "id": "backend_app",
-                    "type": "code_generation",
-                    "generator": "BackendAppBootstrapAgent",
-                    "path": "backend/main.py",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                },
-                {
-                    "id": "frontend_ui",
-                    "type": "code_generation",
-                    "generator": "FrontendAgent",
-                    "path": "frontend",
-                    "depends_on": [
-                        "backend_routes"
-                    ]
-                }
-            ]
-        }
-    },
-    {
-        "prompt": "Build a simple UI that lets me manually enter and view notes in the browser. I don't need any backend or APIs \u2014 the data can live only in the UI for now.",
-        "intent": {
-            "app_summary": "A simple browser-based notes UI that lets a user manually create and view notes; data is kept only in the frontend (no backend or APIs).",
-            "app_category": "form_app",
-            "primary_entities": {
-                "Note": {
-                    "description": "A user-created note with a short title and a body of text entered and viewed in the browser UI.",
-                    "fields": {
-                        "title": {
-                            "type": "string",
-                            "required": true
-                        },
-                        "content": {
-                            "type": "string",
-                            "required": true
-                        }
-                    },
-                    "id_strategy": "auto_increment",
-                    "natural_key_field": null
-                }
-            },
-            "operations": {
-                "Note": [
-                    "create",
-                    "read"
+                "manifest_files": [
+                    {
+                        "file_path": "backend/main.py",
+                        "imports": [
+                            "router"
+                        ],
+                        "exports": [
+                            "app"
+                        ],
+                        "dependencies": [
+                            "fastapi",
+                            "uvicorn"
+                        ],
+                        "summary": "FastAPI application bootstrap. Creates a FastAPI app titled 'Expense Management API', imports and registers the router from backend.routes.expense_routes, and defines root and health endpoints. Runs the server with uvicorn on port 1234 when executed as main."
+                    }
                 ]
             },
-            "ui_expectations": {
-                "complexity": "basic",
-                "interaction_style": "form_and_list"
-            },
-            "assumptions": [
-                "Single-user application",
-                "Local execution",
-                "All note data is stored client-side only (no backend or API).",
-                "Data persistence across page reloads is not guaranteed unless an explicit client-side persistence mechanism (e.g., browser localStorage) is later requested."
-            ],
-            "non_goals": [
-                "Server-side persistence or APIs",
-                "User accounts or authentication",
-                "Cross-device syncing of notes"
-            ]
-        },
-        "mode": "CREATE",
-        "change_summary": "Initial intent created: single Note entity with title and content, frontend-only storage, create/read operations, basic form-and-list UI.",
-        "architecture": {
-            "architecture_version": "1.0",
-            "tech_stack": {
-                "backend": null,
-                "frontend": "streamlit"
-            },
-            "execution_layers": [
-                {
-                    "id": "frontend_ui",
-                    "type": "code_generation",
-                    "generator": "FrontendAgent",
-                    "path": "frontend",
-                    "depends_on": []
-                }
-            ]
-        }
+            {
+                "layer_id": "frontend_ui",
+                "spec": {
+                    "pages": [
+                        {
+                            "entity": "Expense",
+                            "views": [
+                                "list",
+                                "create",
+                                "edit",
+                                "detail",
+                                "delete"
+                            ],
+                            "forms": [
+                                {
+                                    "view_type": "create",
+                                    "fields": [
+                                        "amount",
+                                        "category",
+                                        "date",
+                                        "notes"
+                                    ]
+                                },
+                                {
+                                    "view_type": "edit",
+                                    "fields": [
+                                        "amount",
+                                        "category",
+                                        "date",
+                                        "notes"
+                                    ]
+                                }
+                            ],
+                            "api_endpoints": [
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses"
+                                },
+                                {
+                                    "method": "POST",
+                                    "path": "/expenses"
+                                },
+                                {
+                                    "method": "GET",
+                                    "path": "/expenses/{id}"
+                                },
+                                {
+                                    "method": "PUT",
+                                    "path": "/expenses/{id}"
+                                },
+                                {
+                                    "method": "DELETE",
+                                    "path": "/expenses/{id}"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "frontend/app.py",
+                        "imports": [],
+                        "exports": [
+                            "main",
+                            "list_expenses",
+                            "create_expense",
+                            "edit_expense",
+                            "detail_expense",
+                            "delete_expense"
+                        ],
+                        "dependencies": [
+                            "streamlit",
+                            "requests"
+                        ],
+                        "summary": "Streamlit app for Expense entity. Implements List, Create, Edit, Detail, and Delete views. Uses backend API endpoints from backend_routes: GET /expenses, POST /expenses, GET /expenses/{id}, PUT /expenses/{id}, DELETE /expenses/{id}. Navigation via sidebar; session_state used for selected expense and page. Dates are sent as ISO datetime strings. Handles HTTP errors and connection exceptions, shows success/error feedback, and reruns after actions."
+                    }
+                ]
+            }
+        ],
+        "root_dir": "generated_apps/7c48d9b3-a94f-445c-ad32-cc5802969280"
     }
 ]

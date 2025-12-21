@@ -10,17 +10,37 @@ from langgraph.graph import StateGraph, END
 from langgraph.checkpoint.memory import MemorySaver
 
 from ..graph_states.orchestrator_state import OrchestratorState
+from ..graph_states.code_agents_state import CodeAgentsState
 from ..agents.intent_interpreter_agent import IntentInterpreterAgent
 from ..agents.architect_agent import ArchitectAgent
+from ..agents.spec_planner_agent import SpecPlannerAgent
+from .code_agents_graph import create_code_agents_graph
 from ..utils.system_config import system_config
+
+
+def initialize_graph(state: OrchestratorState, config: Optional[RunnableConfig] = None) -> OrchestratorState:
+    configurable = config.get("configurable", {})  # type: ignore
+    thread_id = configurable.get("thread_id") if isinstance(configurable, dict) else None
+    if not thread_id:
+        raise ValueError("thread_id is required in config.configurable to initialize graph")
+    
+    # Create directory structure: generated_apps/<thread_id>/spec/
+    root_dir = Path("generated_apps") / thread_id
+    root_dir.mkdir(parents=True, exist_ok=True)
+    
+    return {
+        **state,
+        "root_dir": root_dir,
+    }
+    
 
 
 # ==================== Save Nodes ====================
 
 def save_intent_node(state: OrchestratorState, config: Optional[RunnableConfig] = None) -> OrchestratorState:
-    """Save intent to spec directory based on thread_id from config.
+    """Save intent to spec directory using root_dir from state.
     
-    Saves intent.json to generated_apps/<thread_id>/spec/intent.json
+    Saves intent.json to <root_dir>/spec/intent.json
     """
     intent = state.get("intent")
     
@@ -28,18 +48,13 @@ def save_intent_node(state: OrchestratorState, config: Optional[RunnableConfig] 
         # Nothing to save
         return state
     
-    # Infer app_id (thread_id) from config
-    if config is None:
-        raise ValueError("config is required to get thread_id")
+    # Get root_dir from state
+    root_dir = state.get("root_dir")
+    if not root_dir:
+        raise ValueError("root_dir is required in state to save intent")
     
-    # Access configurable from RunnableConfig (RunnableConfig is a TypedDict, supports dict access)
-    configurable = config.get("configurable", {})  # type: ignore
-    thread_id = configurable.get("thread_id") if isinstance(configurable, dict) else None
-    if not thread_id:
-        raise ValueError("thread_id is required in config.configurable to save intent")
-    
-    # Create directory structure: generated_apps/<thread_id>/spec/
-    spec_dir = Path("generated_apps") / thread_id / "spec"
+    # Create directory structure: <root_dir>/spec/
+    spec_dir = root_dir / "spec"
     spec_dir.mkdir(parents=True, exist_ok=True)
     
     # File path
@@ -54,9 +69,9 @@ def save_intent_node(state: OrchestratorState, config: Optional[RunnableConfig] 
 
 
 def save_architecture_node(state: OrchestratorState, config: Optional[RunnableConfig] = None) -> OrchestratorState:
-    """Save architecture to spec directory based on thread_id from config.
+    """Save architecture to spec directory using root_dir from state.
     
-    Saves architecture.json to generated_apps/<thread_id>/spec/architecture.json
+    Saves architecture.json to <root_dir>/spec/architecture.json
     """
     architecture = state.get("architecture")
     
@@ -64,18 +79,13 @@ def save_architecture_node(state: OrchestratorState, config: Optional[RunnableCo
         # Nothing to save
         return state
     
-    # Infer app_id (thread_id) from config
-    if config is None:
-        raise ValueError("config is required to get thread_id")
+    # Get root_dir from state
+    root_dir = state.get("root_dir")
+    if not root_dir:
+        raise ValueError("root_dir is required in state to save architecture")
     
-    # Access configurable from RunnableConfig (RunnableConfig is a TypedDict, supports dict access)
-    configurable = config.get("configurable", {})  # type: ignore
-    thread_id = configurable.get("thread_id") if isinstance(configurable, dict) else None
-    if not thread_id:
-        raise ValueError("thread_id is required in config.configurable to save architecture")
-    
-    # Create directory structure: generated_apps/<thread_id>/spec/
-    spec_dir = Path("generated_apps") / thread_id / "spec"
+    # Create directory structure: <root_dir>/spec/
+    spec_dir = root_dir / "spec"
     spec_dir.mkdir(parents=True, exist_ok=True)
     
     # File path
@@ -89,13 +99,77 @@ def save_architecture_node(state: OrchestratorState, config: Optional[RunnableCo
     return state
 
 
+def save_spec_plan_node(state: OrchestratorState, config: Optional[RunnableConfig] = None) -> OrchestratorState:
+    """Save spec plan to spec directory using root_dir from state.
+    
+    Saves spec_plan.json to <root_dir>/spec/spec_plan.json
+    """
+    spec_plan = state.get("spec_plan")
+    
+    if not spec_plan:
+        # Nothing to save
+        return state
+    
+    # Get root_dir from state
+    root_dir = state.get("root_dir")
+    if not root_dir:
+        raise ValueError("root_dir is required in state to save spec_plan")
+    
+    # Create directory structure: <root_dir>/spec/
+    spec_dir = root_dir / "spec"
+    spec_dir.mkdir(parents=True, exist_ok=True)
+    
+    # File path
+    file_path = spec_dir / "spec_plan.json"
+    
+    # Save spec_plan as JSON
+    with open(file_path, "w") as f:
+        json.dump(spec_plan, f, indent=4, default=str)
+    
+    # Return state unchanged (no saved_files tracking)
+    return state
+
+
+# ==================== Code Agents Wrapper Node ====================
+
+def code_agents_wrapper_node(state: OrchestratorState, config: Optional[RunnableConfig] = None) -> OrchestratorState:
+    """Wrapper node that maps OrchestratorState to CodeAgentsState and invokes the code agents graph.
+    
+    This is needed because the compiled code agents graph expects CodeAgentsState,
+    but the orchestrator uses OrchestratorState.
+    """
+    # Map OrchestratorState to CodeAgentsState
+    code_agents_input: CodeAgentsState = {
+        "intent": state.get("intent"),
+        "architecture": state.get("architecture"),
+        "specs": state.get("spec_plan") or [],  # Map spec_plan to specs
+        "manifests": [],
+        "execution_queue": None,
+        "next_layer_index": None,
+        "root_dir": state.get("root_dir"),
+    }
+    
+    # Get the compiled code agents graph
+    code_agents_graph = create_code_agents_graph()
+    
+    # Invoke the code agents graph
+    result = code_agents_graph.invoke(code_agents_input, config=config)
+    
+    # Map result back to OrchestratorState
+    # Only update manifests, keep everything else from the original state
+    return {
+        **state,
+        "manifests": result.get("manifests") if isinstance(result, dict) else None,
+    }
+
+
 # ==================== Graph Construction ====================
 
 def create_orchestrator_graph():
     """Create and compile the orchestrator graph.
     
     Graph structure:
-    intent_interpreter -> save_intent -> architect -> save_architecture -> END
+    initialize_graph -> intent_interpreter -> save_intent -> architect -> save_architecture -> spec_planner -> save_spec_plan -> code_agents -> END
     
     Returns:
         Compiled LangGraph workflow
@@ -107,8 +181,11 @@ def create_orchestrator_graph():
     workflow = StateGraph(OrchestratorState)
     
     # Add nodes - use agents directly with system config
+    workflow.add_node("initialize_graph", initialize_graph)
+    
     intent_config = system_config["intent_interpreter"]
     architect_config = system_config["architect"]
+    spec_planner_config = system_config["spec_planner"]
     
     workflow.add_node(
         "intent_interpreter",
@@ -128,15 +205,29 @@ def create_orchestrator_graph():
         )
     )
     workflow.add_node("save_architecture", save_architecture_node)
+    workflow.add_node(
+        "spec_planner",
+        SpecPlannerAgent(
+            provider=spec_planner_config["provider"],
+            model=spec_planner_config["model"],
+            additional_kwargs=spec_planner_config["additional_kwargs"],
+        )
+    )
+    workflow.add_node("save_spec_plan", save_spec_plan_node)
+    workflow.add_node("code_agents", code_agents_wrapper_node)
     
     # Set entry point
-    workflow.set_entry_point("intent_interpreter")
+    workflow.set_entry_point("initialize_graph")
     
     # Add edges - deterministic flow
+    workflow.add_edge("initialize_graph", "intent_interpreter")
     workflow.add_edge("intent_interpreter", "save_intent")
     workflow.add_edge("save_intent", "architect")
     workflow.add_edge("architect", "save_architecture")
-    workflow.add_edge("save_architecture", END)
+    workflow.add_edge("save_architecture", "spec_planner")
+    workflow.add_edge("spec_planner", "save_spec_plan")
+    workflow.add_edge("save_spec_plan", "code_agents")
+    workflow.add_edge("code_agents", END)
     
     # Compile the graph
     compiled = workflow.compile(checkpointer=checkpointer)
@@ -176,6 +267,13 @@ def run_orchestrator(
         else:
             agent_registry = []
     
+    # Load layer constraints
+    layer_constraints_path = Path("src/ai/utils/layer_constraints.json")
+    layer_constraints = {}
+    if layer_constraints_path.exists():
+        with open(layer_constraints_path, "r") as f:
+            layer_constraints = json.load(f)
+    
     # Generate UUID for thread_id if app_id not provided
     thread_id = app_id if app_id is not None else str(uuid.uuid4())
     
@@ -185,9 +283,9 @@ def run_orchestrator(
         "user_feedback": user_feedback,
         "existing_intent": existing_intent,  # For MODIFY mode
         "agent_registry": agent_registry,
+        "layer_constraints": layer_constraints,
         "intent": existing_intent,  # Initial intent (will be updated by agent)
         "architecture": existing_architecture,
-        "messages": [],
     }
     
     # Create runnable config with UUID thread_id
@@ -201,6 +299,10 @@ def run_orchestrator(
     graph = create_orchestrator_graph()
     
     # Stream events and yield them
+    # Note: When a compiled graph is used as a node, only the parent node name ("code_agents")
+    # will appear in the stream, not the individual subgraph nodes.
+    # To see subgraph nodes, we would need to use LangGraph's nested streaming or
+    # handle the subgraph execution separately.
     for event in graph.stream(initial_state, config=config):
         # Each event is a dict with node names as keys
         for node_name, node_output in event.items():
