@@ -179,14 +179,34 @@
                         "file_path": "backend/models/task.py",
                         "imports": [],
                         "exports": [
-                            "Task",
-                            "TaskCreate",
+                            "Task"
+                        ],
+                        "dependencies": [
+                            "pydantic"
+                        ],
+                        "summary": "Pydantic models for Task entity. Defines Task domain model: Task has title (str, required) and description (Optional[str], optional). Task is the domain representation and intentionally excludes database/id fields per backend model constraints."
+                    },
+                    {
+                        "file_path": "backend/models/task_create.py",
+                        "imports": [],
+                        "exports": [
+                            "TaskCreate"
+                        ],
+                        "dependencies": [
+                            "pydantic"
+                        ],
+                        "summary": "Pydantic create model for Task. Defines TaskCreate with required title (str) and optional description (Optional[str]). model_config forbids extra fields."
+                    },
+                    {
+                        "file_path": "backend/models/task_update.py",
+                        "imports": [],
+                        "exports": [
                             "TaskUpdate"
                         ],
                         "dependencies": [
                             "pydantic"
                         ],
-                        "summary": "Pydantic models for Task entity. Defines Task (domain model) with fields: title (str, required), description (Optional[str], optional). Defines TaskCreate (input for creating) with title required and description optional; extra fields are forbidden. Defines TaskUpdate (input for updating) with optional title and description; extra fields are forbidden."
+                        "summary": "Pydantic update model for Task. Defines TaskUpdate with optional title and description fields for partial updates. model_config forbids extra fields."
                     }
                 ]
             },
@@ -277,7 +297,7 @@
                             "init_database"
                         ],
                         "dependencies": [],
-                        "summary": "Database initialization script for SQLite. Defines init_database(db_path: str = 'app.db') which creates the tasks table with columns id (INTEGER PRIMARY KEY AUTOINCREMENT), title (TEXT NOT NULL), and description (TEXT). Enables foreign keys and commits then closes the connection."
+                        "summary": "Database initialization script that creates the tasks table. Defines init_database(db_path: str = 'app.db') -> None. Enables PRAGMA foreign_keys = ON, uses CREATE TABLE IF NOT EXISTS, and ensures connection is closed in a finally block."
                     },
                     {
                         "file_path": "backend/db/connection.py",
@@ -286,7 +306,7 @@
                             "get_db_connection"
                         ],
                         "dependencies": [],
-                        "summary": "Connection utility providing get_db_connection(db_path: str = 'app.db') which returns a sqlite3.Connection with row_factory set to sqlite3.Row and foreign_keys pragma enabled."
+                        "summary": "Connection utility providing get_db_connection(db_path: str = 'app.db') -> sqlite3.Connection. Sets conn.row_factory = sqlite3.Row and enables PRAGMA foreign_keys = ON."
                     },
                     {
                         "file_path": "backend/db/task_repository.py",
@@ -299,7 +319,7 @@
                             "TaskRepository"
                         ],
                         "dependencies": [],
-                        "summary": "SQLite repository for Task entity data access. Defines TaskRepository with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Uses parameterized queries, converts sqlite3.Row to Pydantic models with explicit field mapping, and ensures connection cleanup with try/finally."
+                        "summary": "SQLite repository for Task entity data access. Defines TaskRepository with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Uses parameterized queries, try/finally connection management, and maps sqlite3.Row to Pydantic models explicitly."
                     }
                 ]
             },
@@ -366,7 +386,72 @@
                             "TaskService"
                         ],
                         "dependencies": [],
-                        "summary": "Business logic service for Task entity CRUD operations. Defines TaskService with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Optional[Task], delete_task(int) -> None. Delegates data persistence to TaskRepository and initializes repository in __init__."
+                        "summary": "Business logic service for Task entity CRUD operations. Defines TaskService with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Optional[Task], delete_task(int) -> None. Delegates persistence to TaskRepository."
+                    }
+                ]
+            },
+            {
+                "layer_id": "backend_routes",
+                "spec": {
+                    "routes": [
+                        {
+                            "method": "POST",
+                            "path": "/tasks",
+                            "service_call": "TaskService.create_task",
+                            "entity": "Task",
+                            "request_model": "TaskCreate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks",
+                            "service_call": "TaskService.list_tasks",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "List[Task]"
+                        },
+                        {
+                            "method": "GET",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.get_task_by_id",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "PUT",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.update_task",
+                            "entity": "Task",
+                            "request_model": "TaskUpdate",
+                            "response_model": "Task"
+                        },
+                        {
+                            "method": "DELETE",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.delete_task",
+                            "entity": "Task",
+                            "request_model": null,
+                            "response_model": "None"
+                        }
+                    ]
+                },
+                "manifest_files": [
+                    {
+                        "file_path": "backend/routes/task_routes.py",
+                        "imports": [
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate",
+                            "TaskService"
+                        ],
+                        "exports": [
+                            "router"
+                        ],
+                        "dependencies": [
+                            "fastapi"
+                        ],
+                        "summary": "FastAPI router for Task entity. Prefix '/tasks', tag 'tasks'. Exposes endpoints: POST /tasks (create_task -> Task), GET /tasks (list_tasks -> List[Task]), GET /tasks/{id} (get_task_by_id -> Task), PUT /tasks/{id} (update_task -> Task), DELETE /tasks/{id} (delete_task -> None). Integrates with backend.services.task_service.TaskService (initialized at module level) and uses Pydantic models Task, TaskCreate, TaskUpdate from backend.models."
                     }
                 ]
             }
@@ -383,6 +468,10 @@
             [
                 "backend_services",
                 "backend/services"
+            ],
+            [
+                "backend_routes",
+                "backend/routes"
             ]
         ]
     }
