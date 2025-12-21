@@ -14,7 +14,7 @@ from ..prompts.intent_interpreter_prompts import (
     INTENT_INTERPRETER_CREATE_PROMPT,
     INTENT_INTERPRETER_MODIFY_PROMPT,
 )
-from ..graph_states.intent_interpreter_state import IntentInterpreterState
+from ..graph_states.orchestrator_state import OrchestratorState
 
 from ..utils.llm_provider import init_llm
 
@@ -95,7 +95,7 @@ class IntentInterpreterAgent:
         
         return IntentInterpreterResponse(**response_dict)
     
-    def __call__(self, state: IntentInterpreterState, config: Optional[RunnableConfig] = None) -> IntentInterpreterState:
+    def __call__(self, state: OrchestratorState, config: Optional[RunnableConfig] = None) -> OrchestratorState:
         """LangGraph node interface.
         
         Args:
