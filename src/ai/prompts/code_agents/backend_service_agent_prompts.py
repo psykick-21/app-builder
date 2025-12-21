@@ -142,7 +142,7 @@ Use the manifests to:
 
 **1. Generated Files:**
 Return complete, runnable Python service files for each entity. For EACH file you must provide:
-- `filename`: The file name (e.g., "task_service.py")
+- `filename`: ONLY the file name, NOT a path (e.g., "task_service.py" - NOT "backend/services/task_service.py")
 - `code_content`: The complete Python code
 - `imports`: List of symbols imported from OTHER PROJECT FILES (e.g., ['Task', 'TaskCreate', 'TaskUpdate', 'TaskRepository'])
 - `exports`: List of service classes defined (e.g., ["TaskService"])

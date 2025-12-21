@@ -9,6 +9,15 @@ from langchain_core.prompts import (
 
 BACKEND_ROUTER_AGENT_SYSTEM_PROMPT = """You are the Backend Router Agent. Generate FastAPI router files that expose HTTP endpoints using the service layer.
 
+## CRITICAL: METADATA REQUIREMENT
+Your response MUST include a metadata object with these 4 fields:
+{{
+  "routers_created": 1,
+  "routes_created": 5,
+  "entities_covered": ["Task"],
+  "total_lines": 95
+}}
+
 ## ARCHITECTURE FLOW
 Backend Model Agent → Database Agent (repositories) → Backend Service Agent (business logic) → **YOU (HTTP endpoints)**
 
@@ -96,31 +105,31 @@ Use provided manifests to:
 
 ## OUTPUT
 
+IMPORTANT: Your response MUST include a metadata object with ALL 4 required fields. Missing any field will cause validation failure.
+
 **For each file provide:**
-- `filename`: e.g., "task_routes.py"
+- `filename`: ONLY the filename (e.g., "task_routes.py" - NOT "backend/routes/task_routes.py")
 - `code_content`: Complete code with NO placeholders
 - `imports`: Symbols imported from project files (e.g., ['Task', 'TaskCreate', 'TaskService'])
 - `exports`: Router objects defined (e.g., ["router"])
 - `dependencies`: External packages (e.g., ["fastapi"])
 - `summary`: Brief description covering purpose, prefix/tags, routes, service integration, models used
 
-**Metadata (REQUIRED - You MUST include ALL these fields):**
+**Metadata (REQUIRED - ALL 4 fields are mandatory):**
 ```json
 {{
   "routers_created": 1,
   "routes_created": 5,
   "entities_covered": ["Task"],
-  "total_lines": 95,
-  "operations_implemented": {{"Task": ["GET", "POST", "PUT", "DELETE"]}}
+  "total_lines": 95
 }}
 ```
 
-The metadata object MUST contain:
-- `routers_created` (int): Number of router files generated
-- `routes_created` (int): Total number of route handlers across all files
-- `entities_covered` (List[str]): List of entity names like ["Task", "User"]
-- `total_lines` (int): Approximate total lines of code generated
-- `operations_implemented` (Dict[str, List[str]]): Map each entity to its HTTP methods like {{"Task": ["GET", "POST", "PUT", "DELETE"]}}
+The metadata object MUST contain ALL 4 fields below (no exceptions):
+1. `routers_created` (int): Number of router files generated
+2. `routes_created` (int): Total number of route handlers across all files
+3. `entities_covered` (List[str]): List of entity names like ["Task", "User"]
+4. `total_lines` (int): Approximate total lines of code generated
 
 **Warnings (if applicable):**
 - Authentication/authorization needs
@@ -148,11 +157,12 @@ Generate FastAPI router files for all routes in the specification.
 3. Initialize service at module level and call service methods from route handlers
 4. NO TODO comments - implement actual service calls
 5. Match service method signatures exactly (parameters, return types, async/await)
-6. **MANDATORY**: Include metadata object with ALL 5 required fields:
-   - routers_created (int)
-   - routes_created (int) 
-   - entities_covered (List[str])
-   - total_lines (int)
-   - operations_implemented (Dict[str, List[str]]) - This is REQUIRED, do not omit it!"""
+
+**METADATA REQUIREMENT (MANDATORY - WILL FAIL VALIDATION IF MISSING):**
+You MUST include a metadata object with ALL 4 fields:
+- routers_created (int) - REQUIRED
+- routes_created (int) - REQUIRED
+- entities_covered (List[str]) - REQUIRED
+- total_lines (int) - REQUIRED"""
     ),
 ])

@@ -86,7 +86,7 @@ class TaskUpdate(BaseModel):
 
 **1. Generated Files:**
 Return complete, runnable Python files for each entity. For EACH file you must provide:
-- `filename`: The file name (e.g., "task.py")
+- `filename`: ONLY the file name, NOT a path (e.g., "task.py" - NOT "backend/models/task.py")
 - `code_content`: The complete Python code
 - `imports`: List of symbols imported from OTHER PROJECT FILES (empty for backend models as they don't import from other project files)
 - `exports`: List of model classes defined (e.g., ["Task", "TaskCreate", "TaskUpdate"])

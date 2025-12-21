@@ -182,7 +182,7 @@ Use the manifests to:
 
 **1. Generated Files:**
 Return complete, runnable Python files. For EACH file you must provide:
-- `filename`: The file name (e.g., "init_db.py", "connection.py", "task_repository.py")
+- `filename`: ONLY the file name, NOT a path (e.g., "init_db.py", "task_repository.py" - NOT "backend/db/init_db.py")
 - `code_content`: The complete, production-ready Python code with NO placeholders or incomplete implementations
 - `imports`: List of symbols imported from OTHER PROJECT FILES (e.g., ['Task', 'TaskCreate', 'TaskUpdate'] from backend.models)
 - `exports`: List of classes/functions defined (e.g., ["TaskRepository", "init_database", "get_db_connection"])
