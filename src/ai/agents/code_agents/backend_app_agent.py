@@ -110,12 +110,14 @@ class BackendAppAgent:
         writer = get_stream_writer()
         
         # Send custom message before execution
+        message_start = f"🔧 Starting backend app bootstrap generation ({current_layer_id})..."
         if writer:
             writer({
-                "message": f"🔧 Starting backend app bootstrap generation ({current_layer_id})...",
+                "message": message_start,
                 "node": "backend_app_agent",
                 "status": "starting"
             })
+        print(message_start)
         
         # Execute the agent
         result = self.execute(
@@ -167,12 +169,14 @@ class BackendAppAgent:
         )
         
         # Send custom message after execution
+        message_complete = f"✅ Backend app bootstrap generation completed ({current_layer_id})."
         if writer:
             writer({
-                "message": f"✅ Backend app bootstrap generation completed ({current_layer_id}).",
+                "message": message_complete,
                 "node": "backend_app_agent",
                 "status": "completed",
             })
+        print(message_complete)
         
         # Update state with results
         return {

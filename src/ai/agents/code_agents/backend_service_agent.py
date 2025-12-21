@@ -110,12 +110,14 @@ class BackendServiceAgent:
         writer = get_stream_writer()
         
         # Send custom message before execution
+        message_start = f"🔧 Starting backend service generation ({current_layer_id})..."
         if writer:
             writer({
-                "message": f"🔧 Starting backend service generation ({current_layer_id})...",
+                "message": message_start,
                 "node": "backend_service_agent",
                 "status": "starting"
             })
+        print(message_start)
         
         # Execute the agent
         result = self.execute(
@@ -162,12 +164,14 @@ class BackendServiceAgent:
         )
         
         # Send custom message after execution
+        message_complete = f"✅ Backend service generation completed ({current_layer_id})."
         if writer:
             writer({
-                "message": f"✅ Backend service generation completed ({current_layer_id}).",
+                "message": message_complete,
                 "node": "backend_service_agent",
                 "status": "completed",
             })
+        print(message_complete)
         
         # Update state with results
         return {

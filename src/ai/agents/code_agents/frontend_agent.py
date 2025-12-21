@@ -110,12 +110,14 @@ class FrontendAgent:
         writer = get_stream_writer()
         
         # Send custom message before execution
+        message_start = f"🎨 Starting frontend UI generation ({current_layer_id})..."
         if writer:
             writer({
-                "message": f"🎨 Starting frontend UI generation ({current_layer_id})...",
+                "message": message_start,
                 "node": "frontend_agent",
                 "status": "starting"
             })
+        print(message_start)
         
         # Execute the agent
         result = self.execute(
@@ -162,12 +164,14 @@ class FrontendAgent:
         )
         
         # Send custom message after execution
+        message_complete = f"✅ Frontend UI generation completed ({current_layer_id})."
         if writer:
             writer({
-                "message": f"✅ Frontend UI generation completed ({current_layer_id}).",
+                "message": message_complete,
                 "node": "frontend_agent",
                 "status": "completed",
             })
+        print(message_complete)
         
         # Update state with results
         return {

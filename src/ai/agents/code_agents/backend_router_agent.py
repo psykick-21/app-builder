@@ -110,12 +110,14 @@ class BackendRouterAgent:
         writer = get_stream_writer()
         
         # Send custom message before execution
+        message_start = f"🔧 Starting backend router generation ({current_layer_id})..."
         if writer:
             writer({
-                "message": f"🔧 Starting backend router generation ({current_layer_id})...",
+                "message": message_start,
                 "node": "backend_router_agent",
                 "status": "starting"
             })
+        print(message_start)
         
         # Execute the agent
         result = self.execute(
@@ -162,12 +164,14 @@ class BackendRouterAgent:
         )
         
         # Send custom message after execution
+        message_complete = f"✅ Backend router generation completed ({current_layer_id})."
         if writer:
             writer({
-                "message": f"✅ Backend router generation completed ({current_layer_id}).",
+                "message": message_complete,
                 "node": "backend_router_agent",
                 "status": "completed",
             })
+        print(message_complete)
         
         # Update state with results
         return {
