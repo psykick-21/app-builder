@@ -16,6 +16,8 @@ class CodeAgentsState(TypedDict, total=False):
     architecture: Optional[Dict[str, Any]]  # Architecture plan
     specs: Optional[List[Dict[str, Any]]]  # Specs of the layers
     manifests: Optional[List[Dict[str, Any]]]  # Manifest of tasks/items
+    existing_intent: Optional[Dict[str, Any]]  # Existing intent (for finalization)
+    existing_architecture: Optional[Dict[str, Any]]  # Existing architecture (for finalization)
 
     # === To determine execution order ===
     execution_queue: Optional[List[str]]  # List of layer IDs in execution order

@@ -52,6 +52,7 @@ class ArchitectAgent:
         self,
         intent: Dict[str, Any],
         agent_registry: List[Dict[str, Any]],
+        mode: Literal["CREATE", "MODIFY"],
         existing_architecture: Optional[Dict[str, Any]] = None
     ) -> ArchitectResponse:
         """Execute the architecture planning logic.
@@ -59,6 +60,7 @@ class ArchitectAgent:
         Args:
             intent: Validated intent specification dictionary
             agent_registry: List of available generator agents (system configuration)
+            mode: Mode of the architecture planning (CREATE or MODIFY)
             existing_architecture: Existing architecture dictionary (for ITERATIVE mode)
             
         Returns:
@@ -68,7 +70,7 @@ class ArchitectAgent:
         agent_registry_str = json.dumps(agent_registry, indent=2)
         intent_str = json.dumps(intent, indent=2)
         
-        if existing_architecture is None:
+        if mode == "CREATE":
             # INITIAL mode: create new architecture
             response = self.initial_chain.invoke({
                 "intent": intent_str,
@@ -109,6 +111,7 @@ class ArchitectAgent:
         intent = state.get("intent")
         agent_registry = state.get("agent_registry")
         existing_architecture = state.get("existing_architecture")
+        mode = state.get("mode")
         
         if not intent:
             raise ValueError("intent is required in state")
@@ -119,7 +122,8 @@ class ArchitectAgent:
         response = self.execute(
             intent=intent,
             agent_registry=agent_registry,
-            existing_architecture=existing_architecture
+            existing_architecture=existing_architecture,
+            mode=mode
         )
         
         # Validate response

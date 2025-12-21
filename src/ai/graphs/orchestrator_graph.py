@@ -27,10 +27,16 @@ def initialize_graph(state: OrchestratorState, config: Optional[RunnableConfig] 
     # Create directory structure: generated_apps/<thread_id>/spec/
     root_dir = Path("generated_apps") / thread_id
     root_dir.mkdir(parents=True, exist_ok=True)
+
+    if state.get("user_feedback"):
+        mode = "MODIFY"
+    else:
+        mode = "CREATE"
     
     return {
         **state,
         "root_dir": root_dir,
+        "mode": mode,
     }
     
 
@@ -147,6 +153,8 @@ def code_agents_wrapper_node(state: OrchestratorState, config: Optional[Runnable
         "execution_queue": None,
         "next_layer_index": None,
         "root_dir": state.get("root_dir"),
+        "existing_intent": state.get("existing_intent"),
+        "existing_architecture": state.get("existing_architecture"),
     }
     
     # Get the compiled code agents graph
@@ -156,10 +164,12 @@ def code_agents_wrapper_node(state: OrchestratorState, config: Optional[Runnable
     result = code_agents_graph.invoke(code_agents_input, config=config)
     
     # Map result back to OrchestratorState
-    # Only update manifests, keep everything else from the original state
+    # Update manifests, existing_intent, and existing_architecture
     return {
         **state,
         "manifests": result.get("manifests") if isinstance(result, dict) else None,
+        "existing_intent": result.get("existing_intent") if isinstance(result, dict) else state.get("existing_intent"),
+        "existing_architecture": result.get("existing_architecture") if isinstance(result, dict) else state.get("existing_architecture"),
     }
 
 
