@@ -1,0 +1,17 @@
+"""Code agent prompts."""
+
+from .backend_model_agent_prompts import (
+    BACKEND_MODEL_AGENT_SYSTEM_PROMPT,
+    BACKEND_MODEL_AGENT_PROMPT,
+)
+from .backend_service_agent_prompts import (
+    BACKEND_SERVICE_AGENT_SYSTEM_PROMPT,
+    BACKEND_SERVICE_AGENT_PROMPT,
+)
+
+__all__ = [
+    "BACKEND_MODEL_AGENT_SYSTEM_PROMPT",
+    "BACKEND_MODEL_AGENT_PROMPT",
+    "BACKEND_SERVICE_AGENT_SYSTEM_PROMPT",
+    "BACKEND_SERVICE_AGENT_PROMPT",
+]

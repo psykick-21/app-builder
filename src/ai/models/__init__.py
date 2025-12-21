@@ -29,6 +29,7 @@ from .spec_planner_models import (
     PageView,
     FrontendUISpec,
 )
+from .code_agents import CodeAgentResult
 
 __all__ = [
     "EntityField",
@@ -54,5 +55,6 @@ __all__ = [
     "BackendAppBootstrapSpec",
     "PageView",
     "FrontendUISpec",
+    "CodeAgentResult",
 ]
 
