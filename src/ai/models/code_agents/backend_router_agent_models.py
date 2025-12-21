@@ -24,10 +24,6 @@ class BackendRouterAgentMetadata(BaseModel):
         ...,
         description="Approximate total lines of code generated - REQUIRED field"
     )
-    operations_implemented: Dict[str, List[str]] = Field(
-        ...,
-        description="Dictionary mapping entity to list of HTTP methods (e.g., {'Task': ['GET', 'POST', 'PUT', 'DELETE']}) - REQUIRED field"
-    )
     constraints_respected: Optional[bool] = Field(
         None,
         description="Boolean indicating whether all layer constraints were followed"
@@ -62,8 +58,7 @@ class BackendRouterAgentResponse(BaseModel):
             "routers_created (int) - count of router files, "
             "routes_created (int) - total number of routes, "
             "entities_covered (List[str]) - list of entity names like ['Task'], "
-            "total_lines (int) - approximate line count, "
-            "operations_implemented (Dict[str, List[str]]) - mapping like {'Task': ['GET', 'POST', 'PUT', 'DELETE']}. "
+            "total_lines (int) - approximate line count. "
             "This field is MANDATORY and cannot be omitted."
         )
     )
