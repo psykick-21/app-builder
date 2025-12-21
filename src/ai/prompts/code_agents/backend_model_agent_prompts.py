@@ -91,6 +91,12 @@ Return complete, runnable Python files for each entity. For EACH file you must p
 - `imports`: List of symbols imported from OTHER PROJECT FILES (empty for backend models as they don't import from other project files)
 - `exports`: List of model classes defined (e.g., ["Task", "TaskCreate", "TaskUpdate"])
 - `dependencies`: List of external packages needed (e.g., ["pydantic"])
+- `summary`: **REQUIRED** - A concise description of the file including:
+  * Main purpose of the file (e.g., "Pydantic models for Task entity")
+  * Classes defined (e.g., "Task, TaskCreate, TaskUpdate")
+  * Key responsibilities of each class (e.g., "Task: domain model with all fields; TaskCreate: input for creating tasks; TaskUpdate: partial updates")
+  * Important field types and constraints (e.g., "title (str, required), status (str, default='pending')")
+  * Keep it brief but informative enough for other agents to understand usage
 
 **2. Warnings:**
 Emit warnings if you notice:

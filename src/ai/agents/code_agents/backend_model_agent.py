@@ -130,6 +130,7 @@ class BackendModelAgent:
                 imports=file.imports,
                 exports=file.exports,
                 dependencies=file.dependencies,
+                summary=file.summary,
             )
 
             manifest_files.append(manifest_file)

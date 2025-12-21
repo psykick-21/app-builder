@@ -12,6 +12,10 @@ from .backend_service_agent_models import (
     BackendServiceAgentResponse,
     BackendServiceAgentMetadata,
 )
+from .database_agent_models import (
+    DatabaseAgentResponse,
+    DatabaseAgentMetadata,
+)
 
 __all__ = [
     "CodeAgentResult",
@@ -20,4 +24,6 @@ __all__ = [
     "BackendModelAgentMetadata",
     "BackendServiceAgentResponse",
     "BackendServiceAgentMetadata",
+    "DatabaseAgentResponse",
+    "DatabaseAgentMetadata",
 ]

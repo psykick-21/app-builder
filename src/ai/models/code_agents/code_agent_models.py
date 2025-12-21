@@ -45,6 +45,15 @@ class GeneratedFile(BaseModel):
         default_factory=list,
         description="List of external Python packages needed to run this file (e.g., ['pydantic', 'fastapi']). Only include third-party libraries, NOT standard library modules or internal project files."
     )
+    summary: str = Field(
+        ...,
+        description=(
+            "Brief summary of the file's role and functionality. Include: "
+            "main purpose, key functions/classes defined, their responsibilities, "
+            "critical parameters/arguments, and return types. Keep it concise "
+            "but informative enough for other agents to understand how to use this module."
+        )
+    )
 
 
 class ManifestFile(BaseModel):
@@ -64,6 +73,15 @@ class ManifestFile(BaseModel):
     dependencies: List[str] = Field(
         default_factory=list,
         description="List of external Python packages needed to run this file (e.g., ['pydantic', 'fastapi']). Only include third-party libraries, NOT standard library modules or internal project files."
+    )
+    summary: str = Field(
+        ...,
+        description=(
+            "Brief summary of the file's role and functionality. Include: "
+            "main purpose, key functions/classes defined, their responsibilities, "
+            "critical parameters/arguments, and return types. Keep it concise "
+            "but informative enough for other agents to understand how to use this module."
+        )
     )
 
 class Manifest(BaseModel):
