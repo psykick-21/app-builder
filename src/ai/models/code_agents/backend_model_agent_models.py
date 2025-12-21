@@ -8,17 +8,17 @@ from .code_agent_models import GeneratedFile
 
 class BackendModelAgentMetadata(BaseModel):
     """Metadata specific to Backend Model Agent."""
-    models_created: int = Field(
-        ...,
-        description="Number of model classes generated - REQUIRED field"
+    models_created: Optional[int] = Field(
+        None,
+        description="Number of model classes generated"
     )
-    entities_covered: List[str] = Field(
-        ...,
-        description="List of entity names that were processed - REQUIRED field"
+    entities_covered: Optional[List[str]] = Field(
+        None,
+        description="List of entity names that were processed"
     )
-    total_lines: int = Field(
-        ...,
-        description="Approximate total lines of code generated - REQUIRED field"
+    total_lines: Optional[int] = Field(
+        None,
+        description="Approximate total lines of code generated"
     )
     constraints_respected: Optional[bool] = Field(
         None,
@@ -50,11 +50,11 @@ class BackendModelAgentResponse(BaseModel):
         )
     )
     metadata: BackendModelAgentMetadata = Field(
-        ...,
+        default_factory=BackendModelAgentMetadata,
         description=(
             "Metadata about the code generation process. "
-            "IMPORTANT: You MUST populate all required fields: "
+            "All fields are optional: "
             "models_created (int), entities_covered (List[str]), total_lines (int). "
-            "These fields are REQUIRED and must be provided in your response."
+            "Provide these fields when available."
         )
     )

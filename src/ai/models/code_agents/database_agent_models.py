@@ -8,21 +8,21 @@ from .code_agent_models import GeneratedFile
 
 class DatabaseAgentMetadata(BaseModel):
     """Metadata specific to Database Agent."""
-    tables_created: int = Field(
-        ...,
-        description="Number of database tables created - REQUIRED field"
+    tables_created: Optional[int] = Field(
+        None,
+        description="Number of database tables created"
     )
-    repositories_created: int = Field(
-        ...,
-        description="Number of repository classes generated - REQUIRED field"
+    repositories_created: Optional[int] = Field(
+        None,
+        description="Number of repository classes generated"
     )
-    entities_covered: List[str] = Field(
-        ...,
-        description="List of entity names that were processed - REQUIRED field"
+    entities_covered: Optional[List[str]] = Field(
+        None,
+        description="List of entity names that were processed"
     )
-    total_lines: int = Field(
-        ...,
-        description="Approximate total lines of code generated - REQUIRED field"
+    total_lines: Optional[int] = Field(
+        None,
+        description="Approximate total lines of code generated"
     )
     constraints_respected: Optional[bool] = Field(
         None,
@@ -51,11 +51,11 @@ class DatabaseAgentResponse(BaseModel):
         )
     )
     metadata: DatabaseAgentMetadata = Field(
-        ...,
+        default_factory=DatabaseAgentMetadata,
         description=(
             "Metadata about the code generation process. "
-            "IMPORTANT: You MUST populate all required fields: "
+            "All fields are optional: "
             "tables_created (int), repositories_created (int), entities_covered (List[str]), total_lines (int). "
-            "These fields are REQUIRED and must be provided in your response."
+            "Provide these fields when available."
         )
     )

@@ -24,6 +24,10 @@ from .backend_app_agent_models import (
     BackendAppAgentResponse,
     BackendAppAgentMetadata,
 )
+from .frontend_agent_models import (
+    FrontendAgentResponse,
+    FrontendAgentMetadata,
+)
 
 __all__ = [
     "CodeAgentResult",
@@ -38,4 +42,6 @@ __all__ = [
     "BackendRouterAgentMetadata",
     "BackendAppAgentResponse",
     "BackendAppAgentMetadata",
+    "FrontendAgentResponse",
+    "FrontendAgentMetadata",
 ]

@@ -8,20 +8,20 @@ from .code_agent_models import GeneratedFile
 
 class BackendAppAgentMetadata(BaseModel):
     """Metadata specific to Backend App Agent."""
-    app_created: bool = Field(
-        ...,
-        description="Whether the app bootstrap file was created - REQUIRED field"
+    app_created: Optional[bool] = Field(
+        None,
+        description="Whether the app bootstrap file was created"
     )
-    routers_registered: int = Field(
-        ...,
-        description="Number of routers registered in the app - REQUIRED field"
+    routers_registered: Optional[int] = Field(
+        None,
+        description="Number of routers registered in the app"
     )
-    total_lines: int = Field(
-        ...,
-        description="Approximate total lines of code generated - REQUIRED field"
+    total_lines: Optional[int] = Field(
+        None,
+        description="Approximate total lines of code generated"
     )
-    middleware_configured: List[str] = Field(
-        default_factory=list,
+    middleware_configured: Optional[List[str]] = Field(
+        None,
         description="List of middleware configured (if any)"
     )
     constraints_respected: Optional[bool] = Field(
@@ -50,14 +50,14 @@ class BackendAppAgentResponse(BaseModel):
         )
     )
     metadata: BackendAppAgentMetadata = Field(
-        ...,
+        default_factory=BackendAppAgentMetadata,
         description=(
-            "REQUIRED: Metadata about the code generation process. "
-            "You MUST provide this field with ALL required sub-fields: "
+            "Metadata about the code generation process. "
+            "All fields are optional: "
             "app_created (bool) - whether app was created, "
             "routers_registered (int) - number of routers registered, "
             "total_lines (int) - approximate line count, "
             "middleware_configured (List[str]) - list of middleware configured. "
-            "This field is MANDATORY and cannot be omitted."
+            "Provide these fields when available."
         )
     )

@@ -8,25 +8,21 @@ from .code_agent_models import GeneratedFile
 
 class BackendServiceAgentMetadata(BaseModel):
     """Metadata specific to Backend Service Agent."""
-    services_created: int = Field(
-        ...,
-        description="Number of service classes generated - REQUIRED field"
+    services_created: Optional[int] = Field(
+        None,
+        description="Number of service classes generated"
     )
-    entities_covered: List[str] = Field(
-        ...,
-        description="List of entity names that were processed - REQUIRED field"
+    entities_covered: Optional[List[str]] = Field(
+        None,
+        description="List of entity names that were processed"
     )
-    total_lines: int = Field(
-        ...,
-        description="Approximate total lines of code generated - REQUIRED field"
+    total_lines: Optional[int] = Field(
+        None,
+        description="Approximate total lines of code generated"
     )
-    functions_created: int = Field(
-        ...,
-        description="Total number of service functions generated - REQUIRED field"
-    )
-    operations_implemented: Dict[str, List[str]] = Field(
-        ...,
-        description="Dictionary mapping entity to list of operations (e.g., {'Task': ['create', 'read', 'update', 'delete']}) - REQUIRED field"
+    functions_created: Optional[int] = Field(
+        None,
+        description="Total number of service functions generated"
     )
     constraints_respected: Optional[bool] = Field(
         None,
@@ -57,15 +53,14 @@ class BackendServiceAgentResponse(BaseModel):
         )
     )
     metadata: BackendServiceAgentMetadata = Field(
-        ...,
+        default_factory=BackendServiceAgentMetadata,
         description=(
-            "REQUIRED: Metadata about the code generation process. "
-            "You MUST provide this field with ALL required sub-fields: "
+            "Metadata about the code generation process. "
+            "All fields are optional: "
             "services_created (int) - count of service classes, "
             "entities_covered (List[str]) - list of entity names like ['Task'], "
             "total_lines (int) - approximate line count, "
-            "functions_created (int) - total number of service functions, "
-            "operations_implemented (Dict[str, List[str]]) - mapping like {'Task': ['create', 'read', 'update', 'delete']}. "
-            "This field is MANDATORY and cannot be omitted."
+            "functions_created (int) - total number of service functions. "
+            "Provide these fields when available."
         )
     )

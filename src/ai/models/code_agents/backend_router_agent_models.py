@@ -8,21 +8,21 @@ from .code_agent_models import GeneratedFile
 
 class BackendRouterAgentMetadata(BaseModel):
     """Metadata specific to Backend Router Agent."""
-    routers_created: int = Field(
-        ...,
-        description="Number of router files generated - REQUIRED field"
+    routers_created: Optional[int] = Field(
+        None,
+        description="Number of router files generated"
     )
-    routes_created: int = Field(
-        ...,
-        description="Total number of routes generated - REQUIRED field"
+    routes_created: Optional[int] = Field(
+        None,
+        description="Total number of routes generated"
     )
-    entities_covered: List[str] = Field(
-        ...,
-        description="List of entity names that were processed - REQUIRED field"
+    entities_covered: Optional[List[str]] = Field(
+        None,
+        description="List of entity names that were processed"
     )
-    total_lines: int = Field(
-        ...,
-        description="Approximate total lines of code generated - REQUIRED field"
+    total_lines: Optional[int] = Field(
+        None,
+        description="Approximate total lines of code generated"
     )
     constraints_respected: Optional[bool] = Field(
         None,
@@ -51,14 +51,14 @@ class BackendRouterAgentResponse(BaseModel):
         )
     )
     metadata: BackendRouterAgentMetadata = Field(
-        ...,
+        default_factory=BackendRouterAgentMetadata,
         description=(
-            "REQUIRED: Metadata about the code generation process. "
-            "You MUST provide this field with ALL required sub-fields: "
+            "Metadata about the code generation process. "
+            "All fields are optional: "
             "routers_created (int) - count of router files, "
             "routes_created (int) - total number of routes, "
             "entities_covered (List[str]) - list of entity names like ['Task'], "
             "total_lines (int) - approximate line count. "
-            "This field is MANDATORY and cannot be omitted."
+            "Provide these fields when available."
         )
     )
