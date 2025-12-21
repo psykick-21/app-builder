@@ -3,6 +3,7 @@
 from typing import Optional, Dict, Any, List
 from typing_extensions import TypedDict, Annotated
 import operator
+from pathlib import Path
 
 
 class CodeAgentsState(TypedDict, total=False):
@@ -19,3 +20,9 @@ class CodeAgentsState(TypedDict, total=False):
     # === To determine execution order ===
     execution_queue: Optional[List[str]]  # List of layer IDs in execution order
     next_layer_index: Optional[int]  # Index of the next layer to execute
+    
+    # === Finalization ===
+    requirements_text: Optional[str]  # Requirements.txt-like text with all dependencies
+
+    # === Root Directory ===
+    root_dir: Optional[Path]  # Root directory for the app

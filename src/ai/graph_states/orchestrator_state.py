@@ -4,6 +4,7 @@ from typing import Optional, Dict, Any, List
 from typing_extensions import TypedDict, Annotated
 from langchain_core.messages import AnyMessage
 import operator
+from pathlib import Path
 
 
 class OrchestratorState(TypedDict, total=False):
@@ -31,6 +32,12 @@ class OrchestratorState(TypedDict, total=False):
     # === Spec Planner Agent Output ===
     spec_plan: Optional[List[Dict[str, Any]]]  # List of layer-specific execution specs
     
+    # === Code Agents Graph Output ===
+    manifests: Optional[List[Dict[str, Any]]]  # Manifest of tasks/items populated by code agents
+    
     # === System Configuration ===
     agent_registry: Optional[List[Dict[str, Any]]]  # Available generator agents
     layer_constraints: Optional[Dict[str, Any]]  # Layer constraints from layer_constraints.json
+
+    # === Root Directory ===
+    root_dir: Optional[Path]  # Root directory for the app
