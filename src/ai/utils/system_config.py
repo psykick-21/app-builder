@@ -8,7 +8,7 @@ system_config = {
         "provider": "openai",
         "model": "gpt-5-mini",
         "additional_kwargs": {
-            "reasoning_effort": "low",
+            "reasoning_effort": "medium",
         },
     },
     # "architect": {
@@ -59,6 +59,13 @@ system_config = {
         },
     },
     "backend_app_agent": {
+        "provider": "openai",
+        "model": "gpt-5-mini",
+        "additional_kwargs": {
+            "reasoning_effort": "medium",
+        },
+    },
+    "frontend_agent": {
         "provider": "openai",
         "model": "gpt-5-mini",
         "additional_kwargs": {
