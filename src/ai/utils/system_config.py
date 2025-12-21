@@ -50,5 +50,12 @@ system_config = {
         "additional_kwargs": {
             "reasoning_effort": "low",
         },
+    },
+    "backend_router_agent": {
+        "provider": "openai",
+        "model": "gpt-5-mini",
+        "additional_kwargs": {
+            "reasoning_effort": "low",
+        },
     }
 }
