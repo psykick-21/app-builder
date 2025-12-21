@@ -142,7 +142,11 @@ class TaskRepository:
 - For UPDATE operations: UPDATE with WHERE clause, commit, then SELECT and return updated object
 - For DELETE operations: DELETE with WHERE clause, commit, return None or success indicator
 - For LIST operations: SELECT all or with filters, return List of Pydantic models
-- Import models from backend.models (use exact model names from manifests)
+- **IMPORT RULES - CRITICAL**: ALWAYS use absolute imports starting with `backend.`
+  - Correct: `from backend.db.connection import get_db_connection`
+  - Correct: `from backend.models.task import Task, TaskCreate, TaskUpdate`
+  - WRONG: `from connection import get_db_connection` (missing backend.db prefix)
+  - WRONG: `from .connection import ...` (no relative imports)
 - Convert sqlite3.Row objects to Pydantic models by explicitly mapping fields: Model(field1=row['field1'], field2=row['field2'])
 - Handle Optional return types correctly (return None when object not found)
 

@@ -27,6 +27,7 @@ from datetime import datetime
 
 class Task(BaseModel):
     \"""Domain model for Task entity.\"""
+    id: int = Field(..., description="Task ID")
     title: str = Field(..., description="Task title")
     description: Optional[str] = Field(None, description="Task description")
     status: str = Field(default="pending", description="Task status")
@@ -64,8 +65,13 @@ class TaskUpdate(BaseModel):
 - Use `Field(...)` for required fields
 - Use `Field(None)` or `Field(default=...)` for optional fields
 - Include description parameter from spec
-- Do NOT include `id` or database fields in domain models
-- Do NOT use `read_only=True` or other non-functional metadata
+- **CRITICAL - ID Field Handling**:
+  - **Domain Model**: MUST include `id` field if present in spec (even if read_only)
+    - Example: `id: int = Field(..., description="Task ID")`
+  - **Create Model**: Do NOT include `id` (system-generated, not user input)
+  - **Update Model**: Do NOT include `id` (IDs cannot be changed)
+- Do NOT use `read_only=True` or other Pydantic v1 metadata (not supported in v2)
+- For read-only fields in domain model, just include them as regular fields
 
 **Model Configuration:**
 - Add `model_config = ConfigDict(extra="forbid")` to Create and Update models
@@ -119,7 +125,7 @@ Example metadata:
   "entities_covered": ["Task"],
   "total_lines": 72,
   "constraints_respected": true,
-  "assumptions_made": ["Excluded 'id' from Task domain model"]
+  "assumptions_made": ["Included id field in domain model per spec"]
 }}
 ```
 
@@ -137,6 +143,12 @@ BACKEND_MODEL_AGENT_PROMPT = ChatPromptTemplate.from_messages([
 Entity Information:
 {entities_info}
 
-Generate Python Pydantic model files for all models in the specification. Follow the spec exactly as provided."""
+Generate Python Pydantic model files for all models in the specification. Follow the spec exactly as provided.
+
+**CRITICAL REQUIREMENTS:**
+1. Include ALL fields from spec in domain models, including `id` if present (even if marked read_only)
+2. Exclude `id` from Create and Update models (system-managed)
+3. Use Pydantic v2 syntax (ConfigDict, no read_only metadata)
+4. Set model_config = ConfigDict(extra="forbid") on Create and Update models only"""
     ),
 ])

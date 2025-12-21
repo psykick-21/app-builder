@@ -87,7 +87,11 @@ async def delete_task(task_id: int) -> None:
 - Service layer is complete - just call the methods that exist
 
 **Model Imports:**
-- Import Pydantic models from `backend.models.<entity>` (e.g., `Task`, `TaskCreate`, `TaskUpdate`)
+- **IMPORT RULES - CRITICAL**: ALWAYS use absolute imports starting with `backend.`
+  - Correct: `from backend.models.task import Task, TaskCreate, TaskUpdate`
+  - Correct: `from backend.services.task_service import TaskService`
+  - WRONG: `from task_service import TaskService` (missing backend.services prefix)
+  - WRONG: `from .services.task_service import ...` (no relative imports)
 - Use Create models for POST, Update models for PUT/PATCH, domain models for responses
 
 **MANIFESTS:**

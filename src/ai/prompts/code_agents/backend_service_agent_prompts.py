@@ -92,7 +92,11 @@ class TaskService:
 - Class name: PascalCase with Service suffix (e.g., `TaskService`)
 
 **Model Usage:**
-- Import models from backend.models (e.g., `from backend.models.task import Task, TaskCreate, TaskUpdate`)
+- **IMPORT RULES - CRITICAL**: ALWAYS use absolute imports starting with `backend.`
+  - Correct: `from backend.models.task import Task, TaskCreate, TaskUpdate`
+  - Correct: `from backend.db.task_repository import TaskRepository`
+  - WRONG: `from task_repository import TaskRepository` (missing backend.db prefix)
+  - WRONG: `from .db.task_repository import ...` (no relative imports)
 - Use Create models for creation inputs
 - Use Update models for update inputs
 - Return domain models
@@ -167,8 +171,6 @@ You MUST populate the metadata field with ALL required fields:
 - `entities_covered` (List[str]): List of entity names processed - REQUIRED
 - `total_lines` (int): Approximate total lines of code generated - REQUIRED
 - `functions_created` (int): Total number of service functions - REQUIRED
-- `operations_implemented` (Dict[str, List[str]]): Entity to operations mapping - REQUIRED
-  - Example: {{"Task": ["create", "read", "update", "delete"]}}
 - `constraints_respected` (bool, optional): Whether all constraints were followed
 - `assumptions_made` (List[str], optional): List of assumptions made
 
@@ -179,7 +181,6 @@ Example metadata:
   "entities_covered": ["Task"],
   "total_lines": 85,
   "functions_created": 5,
-  "operations_implemented": {{"Task": ["create", "read", "update", "delete"]}},
   "constraints_respected": true,
   "assumptions_made": ["Assumed task_id is int type"]
 }}}}
@@ -215,7 +216,6 @@ Generate Python service files for all services in the specification. Follow the 
 - entities_covered (List[str]): List of entity names
 - total_lines (int): Approximate line count
 - functions_created (int): Total number of functions
-- operations_implemented (Dict[str, List[str]]): Entity to operations mapping
 
 The metadata field is REQUIRED and must be included in every response."""
     ),

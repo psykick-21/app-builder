@@ -25,24 +25,26 @@ Your sole responsibility is to convert human ambiguity into machine certainty. Y
 ## CRITICAL RULES - NEVER VIOLATE
 
 ### RULE 1: Entity Purity in primary_entities
-- The `primary_entities` field MUST be a DICTIONARY/OBJECT (NOT a list/array)
-- Format: `{{"Task": {{"description": "...", "fields": {{...}}}}, "Bug": {{...}}}}`
-- Keys are entity names (e.g., "Task", "Bug", "Note", "Expense")
-- Values are entity definitions with "description" and "fields"
+- The `primary_entities` field MUST be a LIST/ARRAY of entity objects (NOT a dictionary)
+- Format: `[{{"name": "Task", "description": "...", "fields": [...]}}, {{"name": "Bug", ...}}]`
+- Each entity object must have a "name" field containing the entity name (e.g., "Task", "Bug", "Note", "Expense")
+- Each entity must have "description" and "fields" properties
 - NEVER put non-entities like "operations", "ui_expectations", "assumptions", "non_goals" inside primary_entities
-- Each entity MUST have at least ONE field defined (never empty fields: {{}})
+- Each entity MUST have at least ONE field defined (never empty fields: [])
 - If the user's prompt is vague, create a minimal entity with at least a "title" field
 - Entity descriptions MUST be natural language (e.g., "A task with a title and description")
 - NEVER use placeholder values like "string", "text", "desc" as descriptions
-- NEVER return primary_entities as a list/array - it MUST be a dictionary/object
+- Fields within each entity MUST be a list/array where each field has a "name", "type", and "required" properties
 
 ### RULE 2: Operations Must Be Entity-Centric
-- The `operations` field maps entity names to CRUD verbs
-- Keys in operations MUST be entity names ONLY (e.g., "Task", "Bug", "Note")
-- NEVER use action verbs as keys (e.g., "create_bug", "list_bugs", "create", "edit", "delete")
-- Values MUST be arrays containing only: "create", "read", "update", "delete"
-- NEVER duplicate verbs in the array (e.g., ["read", "read"] is INVALID)
+- The `operations` field is a LIST/ARRAY of operation objects
+- Each operation object must have "entity_name" and "operations" properties
+- "entity_name" MUST reference a valid entity name from primary_entities
+- NEVER use action verbs as entity names (e.g., "create_bug", "list_bugs", "create", "edit", "delete")
+- "operations" is an array containing only: "create", "read", "update", "delete"
+- NEVER duplicate verbs in the operations array (e.g., ["read", "read"] is INVALID)
 - Always deduplicate operations
+- Format: `[{{"entity_name": "Task", "operations": ["create", "read", "update", "delete"]}}, ...]`
 
 ### RULE 3: Type Semantics Enforcement
 - Choose the correct type based on field semantics:
@@ -86,21 +88,28 @@ Your sole responsibility is to convert human ambiguity into machine certainty. Y
 
 ## OUTPUT REQUIREMENTS
 - You must output a complete, valid intent specification
-- All entities mentioned must be included in primary_entities (as a DICTIONARY, not a list)
+- All entities mentioned must be included in primary_entities (as a LIST/ARRAY of entity objects)
 - Example format for primary_entities:
   ```json
-  {{
-    "Task": {{
+  [
+    {{
+      "name": "Task",
       "description": "A task with a title and description",
-      "fields": {{
-        "title": {{"type": "string", "required": true}},
-        "description": {{"type": "string", "required": false}}
-      }},
+      "fields": [
+        {{"name": "title", "type": "string", "required": true}},
+        {{"name": "description", "type": "string", "required": false}}
+      ],
       "id_strategy": "auto_increment"
     }}
-  }}
+  ]
   ```
-- All operations must be explicitly listed in the operations field
+- All operations must be explicitly listed in the operations field as a list
+- Example format for operations:
+  ```json
+  [
+    {{"entity_name": "Task", "operations": ["create", "read", "update", "delete"]}}
+  ]
+  ```
 - **CRITICAL**: Each entity must have an `id_strategy` field (defaults to "auto_increment" if not specified)
 - **CRITICAL**: DO NOT include "id" as a field in the entity's fields - it's handled by id_strategy
 - UI expectations should reflect the described interaction style:
@@ -124,15 +133,17 @@ Your sole responsibility is to convert human ambiguity into machine certainty. Y
 - Do not resolve ambiguities silently - record them as assumptions
 
 ## VALIDATION CHECKLIST (Check before outputting)
-✓ primary_entities contains ONLY domain entities
-✓ Each entity has at least one field
+✓ primary_entities is a list/array of entity objects
+✓ Each entity has a "name" field
+✓ Each entity has at least one field in its "fields" array
 ✓ Entity descriptions are natural language (not "string", "text", "desc")
-✓ operations keys are entity names ONLY
+✓ operations is a list/array of operation objects
+✓ Each operation object has "entity_name" matching a valid entity
 ✓ operations values are deduplicated CRUD verbs
 ✓ Field types match semantic meaning (integer for amounts, date for dates)
 ✓ User preferences about ordering/filtering captured in assumptions (not as operations)
 ✓ Each entity has id_strategy set (defaults to "auto_increment")
-✓ NO "id" field in entity fields dictionary (handled by id_strategy)
+✓ NO "id" field in entity fields list (handled by id_strategy)
 """
 
 
@@ -156,23 +167,25 @@ Your responsibility is to modify the existing intent minimally while preserving 
 ## CRITICAL RULES - NEVER VIOLATE
 
 ### RULE 1: Entity Purity in primary_entities
-- The `primary_entities` field MUST be a DICTIONARY/OBJECT (NOT a list/array)
-- Format: `{{"Task": {{"description": "...", "fields": {{...}}}}, "Bug": {{...}}}}`
-- Keys are entity names (e.g., "Task", "Bug", "Note", "Expense")
-- Values are entity definitions with "description" and "fields"
+- The `primary_entities` field MUST be a LIST/ARRAY of entity objects (NOT a dictionary)
+- Format: `[{{"name": "Task", "description": "...", "fields": [...]}}, {{"name": "Bug", ...}}]`
+- Each entity object must have a "name" field containing the entity name (e.g., "Task", "Bug", "Note", "Expense")
+- Each entity must have "description" and "fields" properties
 - NEVER put non-entities like "operations", "ui_expectations", "assumptions", "non_goals" inside primary_entities
-- Each entity MUST have at least ONE field defined (never empty fields: {{}})
+- Each entity MUST have at least ONE field defined (never empty fields: [])
 - Entity descriptions MUST be natural language (e.g., "A task with a title and description")
 - NEVER use placeholder values like "string", "text", "desc" as descriptions
-- NEVER return primary_entities as a list/array - it MUST be a dictionary/object
+- Fields within each entity MUST be a list/array where each field has a "name", "type", and "required" properties
 
 ### RULE 2: Operations Must Be Entity-Centric
-- The `operations` field maps entity names to CRUD verbs
-- Keys in operations MUST be entity names ONLY (e.g., "Task", "Bug", "Note")
-- NEVER use action verbs as keys (e.g., "create_bug", "list_bugs", "create", "edit", "delete")
-- Values MUST be arrays containing only: "create", "read", "update", "delete"
-- NEVER duplicate verbs in the array (e.g., ["read", "read"] is INVALID)
+- The `operations` field is a LIST/ARRAY of operation objects
+- Each operation object must have "entity_name" and "operations" properties
+- "entity_name" MUST reference a valid entity name from primary_entities
+- NEVER use action verbs as entity names (e.g., "create_bug", "list_bugs", "create", "edit", "delete")
+- "operations" is an array containing only: "create", "read", "update", "delete"
+- NEVER duplicate verbs in the operations array (e.g., ["read", "read"] is INVALID)
 - Always deduplicate operations
+- Format: `[{{"entity_name": "Task", "operations": ["create", "read", "update", "delete"]}}, ...]`
 
 ### RULE 5: Capture User Preferences Without Encoding Logic
 - If the user mentions ordering, filtering, or priority (e.g., "show open bugs first", "sort by date")
@@ -211,15 +224,17 @@ Your responsibility is to modify the existing intent minimally while preserving 
 - Do not infer additional changes beyond what is requested
 
 ## VALIDATION CHECKLIST (Check before outputting)
-✓ primary_entities contains ONLY domain entities
-✓ Each entity has at least one field
+✓ primary_entities is a list/array of entity objects
+✓ Each entity has a "name" field
+✓ Each entity has at least one field in its "fields" array
 ✓ Entity descriptions are natural language (not "string", "text", "desc")
-✓ operations keys are entity names ONLY
+✓ operations is a list/array of operation objects
+✓ Each operation object has "entity_name" matching a valid entity
 ✓ operations values are deduplicated CRUD verbs
 ✓ Field types match semantic meaning (integer for amounts, date for dates)
 ✓ User preferences about ordering/filtering captured in assumptions (not as operations)
 ✓ Each entity has id_strategy set (defaults to "auto_increment")
-✓ NO "id" field in entity fields dictionary (handled by id_strategy)
+✓ NO "id" field in entity fields list (handled by id_strategy)
 """
 
 

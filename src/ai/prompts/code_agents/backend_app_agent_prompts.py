@@ -41,7 +41,7 @@ async def health():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=1234)
 ```
 
 ## REQUIREMENTS
@@ -59,17 +59,49 @@ if __name__ == "__main__":
 **App Configuration:**
 - Set title, description, version (use sensible defaults if not in spec)
 - Add root `/` and `/health` endpoints
-- Include uvicorn runner in `if __name__ == "__main__"`
+- Include uvicorn runner in `if __name__ == "__main__"` with port 1234
 
-**Middleware (if specified):**
-- Configure middleware from spec (CORS, etc.)
-- Use standard FastAPI middleware patterns
+**Middleware Handling:**
+CRITICAL: There is NO middleware agent - custom middleware does not exist!
+
+**Rules:**
+1. Check manifests - if middleware file path exists in manifests, import it
+2. If middleware is in spec but NOT in manifests (most common case):
+   - DO NOT import custom middleware (e.g., `backend.middleware.error_handler.ErrorHandlerMiddleware`)
+   - Instead, use FastAPI built-in alternatives:
+     - For error handling: Use FastAPI's built-in exception handlers (no middleware needed)
+     - For CORS: Use `from fastapi.middleware.cors import CORSMiddleware`
+     - For trusted hosts: Use `from fastapi.middleware.trustedhost import TrustedHostMiddleware`
+     - For HTTPS redirect: Use `from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware`
+   - Emit a warning about skipping custom middleware
+3. If no suitable built-in alternative exists, skip middleware entirely and emit warning
+
+**Example:**
+```python
+# Spec says: "backend.middleware.error_handler.ErrorHandlerMiddleware"
+# But it's NOT in manifests, so:
+
+# ❌ DO NOT DO THIS:
+# from backend.middleware.error_handler import ErrorHandlerMiddleware
+# app.add_middleware(ErrorHandlerMiddleware)
+
+# ✅ INSTEAD: Skip it (FastAPI has built-in error handling)
+# OR use built-in FastAPI middleware if appropriate:
+# from fastapi.middleware.cors import CORSMiddleware
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     allow_methods=["*"],
+#     allow_headers=["*"]
+# )
+```
 
 **MANIFESTS:**
 Use manifests to:
 - Find router module paths (e.g., `backend.routes.task_routes`)
 - Verify router variable names (should be `router` in each file)
-- Import routers correctly
+- **IMPORTANT**: Check if middleware files exist - custom middleware from `backend.middleware.*` will NOT exist (no middleware agent)
+- Only import modules that exist in manifests
 
 **DO NOT:**
 - Add business logic (that's in services)
@@ -104,7 +136,8 @@ Must include:
 - `middleware_configured` (List[str]): List of middleware names (empty if none)
 
 **Warnings (if applicable):**
-- Missing middleware recommendations
+- Custom middleware specified in spec but not found in manifests (always skip custom middleware)
+- Suggest using FastAPI built-in middleware alternatives
 - Configuration concerns"""
 
 
@@ -127,11 +160,17 @@ Generate the FastAPI main.py file that registers all routers.
 2. Import `router` from each module with aliases (e.g., `as task_router`)
 3. Register all routers with app.include_router()
 4. Include root `/` and `/health` endpoints
-5. NO TODO comments - implement complete app setup
-6. **MANDATORY**: Include metadata with all 4 fields:
+5. **MIDDLEWARE - IMPORTANT**: 
+   - Custom middleware (backend.middleware.*) does NOT exist (no middleware agent in architecture)
+   - Check manifests: if middleware file path is NOT in manifests, DO NOT import it
+   - Skip custom middleware from spec and emit warning
+   - Optionally suggest FastAPI built-in alternatives (CORSMiddleware, etc.) in warnings
+   - Only configure middleware that exists in manifests OR is FastAPI built-in
+6. NO TODO comments - implement complete app setup
+7. **MANDATORY**: Include metadata with all 4 fields:
    - app_created (bool)
    - routers_registered (int)
    - total_lines (int)
-   - middleware_configured (List[str])"""
+   - middleware_configured (List[str]) - list only middleware that was actually configured (empty if none)"""
     ),
 ])
