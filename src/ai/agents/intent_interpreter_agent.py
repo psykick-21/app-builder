@@ -8,6 +8,7 @@ import os
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
+from langgraph.config import get_stream_writer
 
 from ..models.intent_models import IntentInterpreterResponse
 from ..prompts.intent_interpreter_prompts import (
@@ -47,18 +48,23 @@ class IntentInterpreterAgent:
         self.create_chain = INTENT_INTERPRETER_CREATE_PROMPT | self.llm
         self.modify_chain = INTENT_INTERPRETER_MODIFY_PROMPT | self.llm
     
-    def execute(self, raw_user_input: str = None, existing_intent: Dict[str, Any] = None, user_feedback: str = None) -> IntentInterpreterResponse:
+    def execute(self, raw_user_input: str = None, existing_intent: Dict[str, Any] = None, user_feedback: str = None, mode: str = None) -> IntentInterpreterResponse:
         """Execute the intent interpretation logic.
         
         Args:
             raw_user_input: User's application description (for CREATE mode)
             existing_intent: Existing intent dictionary (for MODIFY mode)
             user_feedback: User feedback for modifying intent (for MODIFY mode)
+            mode: Explicit mode ("CREATE" or "MODIFY"). If not provided, inferred from existing_intent.
             
         Returns:
             Raw IntentInterpreterResponse from the LLM chain
         """
-        if existing_intent is None:
+        # Determine mode: use explicit mode if provided, otherwise infer from existing_intent
+        if mode is None:
+            mode = "MODIFY" if existing_intent is not None else "CREATE"
+        
+        if mode == "CREATE":
             # CREATE mode: extract intent from raw user input
             if not raw_user_input:
                 raise ValueError("raw_user_input is required for CREATE mode")
@@ -68,6 +74,8 @@ class IntentInterpreterAgent:
             })
         else:
             # MODIFY mode: evolve existing intent based on feedback
+            if not existing_intent:
+                raise ValueError("existing_intent is required for MODIFY mode")
             if not user_feedback:
                 raise ValueError("user_feedback is required for MODIFY mode")
             
@@ -105,22 +113,42 @@ class IntentInterpreterAgent:
         Returns:
             Updated state with intent and change_summary
         """
+        # Get stream writer for custom streaming
+        writer = get_stream_writer()
+        
         # Extract inputs from state
         raw_user_input = state.get("raw_user_input")
         existing_intent = state.get("existing_intent")
         user_feedback = state.get("user_feedback")
+        mode = state.get("mode")
+        
+        # Send custom message before execution
+        if writer:
+            writer({
+                "message": f"🔄 Interpreting intent ({mode} mode)...",
+                "node": "intent_interpreter",
+                "status": "starting"
+            })
         
         # Execute the agent
         response = self.execute(
             raw_user_input=raw_user_input,
             existing_intent=existing_intent,
-            user_feedback=user_feedback
+            user_feedback=user_feedback,
+            mode=mode
         )
         
         # Validate response
         if not isinstance(response, IntentInterpreterResponse):
             raise ValueError(f"Unexpected response type: {type(response)}")
         
+        # Send custom message after execution
+        if writer:
+            writer({
+                "message": f"✅ Intent interpretation completed ({mode} mode).",
+                "node": "intent_interpreter",
+                "status": "completed",
+            })
         
         # Update state with results (persistence handled by orchestrator)
         return {

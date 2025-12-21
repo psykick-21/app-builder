@@ -5,6 +5,7 @@ import json
 from dotenv import load_dotenv
 from pathlib import Path
 from langchain_core.runnables import RunnableConfig
+from langgraph.config import get_stream_writer
 import os
 
 from ...models.code_agents.code_agent_models import CodeAgentResult
@@ -82,6 +83,9 @@ class BackendModelAgent:
         Returns:
             Updated state with code generation results
         """
+        # Get stream writer for custom streaming
+        writer = get_stream_writer()
+        
         # Extract inputs from state
         entities = state.get("intent").get("primary_entities")
 
@@ -101,6 +105,14 @@ class BackendModelAgent:
         # Convert spec dict to model if needed
         if isinstance(backend_models_spec, dict):
             backend_models_spec = BackendModelsSpec(**backend_models_spec)
+        
+        # Send custom message before execution
+        if writer:
+            writer({
+                "message": f"🔧 Starting backend model generation ({current_layer_id})...",
+                "node": "backend_model_agent",
+                "status": "starting"
+            })
         
         # Execute the agent
         result = self.execute(
@@ -144,6 +156,14 @@ class BackendModelAgent:
             spec=backend_models_spec.model_dump(),
             manifest_files=manifest_files,
         )
+        
+        # Send custom message after execution
+        if writer:
+            writer({
+                "message": f"✅ Backend model generation completed ({current_layer_id}).",
+                "node": "backend_model_agent",
+                "status": "completed",
+            })
         
         # Update state with results
         return {

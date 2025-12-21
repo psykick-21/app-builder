@@ -5,6 +5,7 @@ import json
 from dotenv import load_dotenv
 from pathlib import Path
 from langchain_core.runnables import RunnableConfig
+from langgraph.config import get_stream_writer
 import os
 
 from ...models.code_agents.code_agent_models import ManifestFile, Manifest
@@ -105,6 +106,17 @@ class FrontendAgent:
         if isinstance(frontend_ui_spec, dict):
             frontend_ui_spec = FrontendUISpec(**frontend_ui_spec)
         
+        # Get stream writer for custom streaming
+        writer = get_stream_writer()
+        
+        # Send custom message before execution
+        if writer:
+            writer({
+                "message": f"🎨 Starting frontend UI generation ({current_layer_id})...",
+                "node": "frontend_agent",
+                "status": "starting"
+            })
+        
         # Execute the agent
         result = self.execute(
             entities=entities,
@@ -148,6 +160,14 @@ class FrontendAgent:
             spec=frontend_ui_spec.model_dump(),
             manifest_files=manifest_files,
         )
+        
+        # Send custom message after execution
+        if writer:
+            writer({
+                "message": f"✅ Frontend UI generation completed ({current_layer_id}).",
+                "node": "frontend_agent",
+                "status": "completed",
+            })
         
         # Update state with results
         return {

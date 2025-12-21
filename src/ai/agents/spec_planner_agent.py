@@ -2,10 +2,12 @@
 
 from typing import Dict, Any, Optional, Literal
 import json
+from pathlib import Path
 from dotenv import load_dotenv
 import os
 
 from langchain_core.runnables import RunnableConfig
+from langgraph.config import get_stream_writer
 from pydantic import BaseModel
 
 from ..models.spec_planner_models import (
@@ -135,10 +137,16 @@ class SpecPlannerAgent:
         Returns:
             Updated state with spec_plan (list of all layer specs)
         """
+        # Get stream writer for custom streaming
+        writer = get_stream_writer()
+        
         # Extract inputs from state
         intent = state.get("intent")
         architecture = state.get("architecture")
         layer_constraints = state.get("layer_constraints")
+        affected_layers = state.get("affected_layers")  # None in CREATE mode, list in MODIFY mode
+        mode = state.get("mode")
+        root_dir = state.get("root_dir")
         
         if not intent:
             raise ValueError("intent is required in state")
@@ -152,29 +160,94 @@ class SpecPlannerAgent:
         if not execution_layers:
             raise ValueError("architecture must contain at least one execution layer")
         
-        # Execute the agent for each layer
+        # Send custom message before execution
+        if writer:
+            writer({
+                "message": f"📋 Planning system specifications ({mode} mode)...",
+                "node": "spec_planner",
+                "status": "starting"
+            })
+        
+        # Load existing spec plan if in MODIFY mode
+        existing_spec_plan = None
+        if mode == "MODIFY" and root_dir:
+            spec_plan_path = root_dir / "spec" / "spec_plan.json"
+            if spec_plan_path.exists():
+                with open(spec_plan_path, "r") as f:
+                    existing_spec_plan = json.load(f)
+        
+        # Build spec plan
         spec_plan = []
         for layer in execution_layers:
             layer_id = layer.get("id")
             if not layer_id:
                 raise ValueError(f"Layer missing 'id' field: {layer}")
             
-            # Execute for this layer
-            response = self.execute(
-                intent=intent,
-                architecture=architecture,
-                layer_id=layer_id,
-                layer_constraints=layer_constraints
+            # Check if we need to regenerate this layer
+            should_regenerate = (
+                mode == "CREATE" or  # CREATE mode: generate all
+                affected_layers is None or  # No impact analysis: generate all
+                layer_id in affected_layers  # Layer is affected
             )
             
-            # Validate response
-            if not isinstance(response, BaseModel):
-                raise ValueError(f"Unexpected response type for layer '{layer_id}': {type(response)}")
-            
-            # Collect the result
-            spec_plan.append({
-                "layer_id": layer_id,
-                "spec": response.model_dump(),
+            if should_regenerate:
+                # Regenerate spec for this layer
+                response = self.execute(
+                    intent=intent,
+                    architecture=architecture,
+                    layer_id=layer_id,
+                    layer_constraints=layer_constraints
+                )
+                
+                # Validate response
+                if not isinstance(response, BaseModel):
+                    raise ValueError(f"Unexpected response type for layer '{layer_id}': {type(response)}")
+                
+                # Add to spec plan
+                spec_plan.append({
+                    "layer_id": layer_id,
+                    "spec": response.model_dump(),
+                })
+            else:
+                # Reuse existing spec for this layer
+                if existing_spec_plan:
+                    existing_layer_spec = next(
+                        (spec for spec in existing_spec_plan if spec.get("layer_id") == layer_id),
+                        None
+                    )
+                    if existing_layer_spec:
+                        spec_plan.append(existing_layer_spec)
+                    else:
+                        # Fallback: regenerate if not found
+                        response = self.execute(
+                            intent=intent,
+                            architecture=architecture,
+                            layer_id=layer_id,
+                            layer_constraints=layer_constraints
+                        )
+                        spec_plan.append({
+                            "layer_id": layer_id,
+                            "spec": response.model_dump(),
+                        })
+                else:
+                    # No existing spec plan, regenerate
+                    response = self.execute(
+                        intent=intent,
+                        architecture=architecture,
+                        layer_id=layer_id,
+                        layer_constraints=layer_constraints
+                    )
+                    spec_plan.append({
+                        "layer_id": layer_id,
+                        "spec": response.model_dump(),
+                    })
+        
+        # Send custom message after execution
+        if writer:
+            writer({
+                "message": f"✅ Spec planning completed ({mode} mode).",
+                "node": "spec_planner",
+                "status": "completed",
             })
         
         # Update state with all layer specs

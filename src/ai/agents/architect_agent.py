@@ -8,6 +8,7 @@ import os
 from langchain_core.runnables import RunnableConfig
 from langchain_openai import ChatOpenAI
 from langchain_ollama import ChatOllama
+from langgraph.config import get_stream_writer
 
 from ..models.architect_models import ArchitectResponse
 from ..prompts.architect_prompts import (
@@ -107,6 +108,9 @@ class ArchitectAgent:
         Returns:
             Updated state with architecture
         """
+        # Get stream writer for custom streaming
+        writer = get_stream_writer()
+        
         # Extract inputs from state
         intent = state.get("intent")
         agent_registry = state.get("agent_registry")
@@ -117,6 +121,14 @@ class ArchitectAgent:
             raise ValueError("intent is required in state")
         if not agent_registry:
             raise ValueError("agent_registry is required in state")
+        
+        # Send custom message before execution
+        if writer:
+            writer({
+                "message": f"🏗️ Planning architecture ({mode} mode)...",
+                "node": "architect",
+                "status": "starting"
+            })
         
         # Execute the agent
         response = self.execute(
@@ -129,6 +141,14 @@ class ArchitectAgent:
         # Validate response
         if not isinstance(response, ArchitectResponse):
             raise ValueError(f"Unexpected response type: {type(response)}")
+        
+        # Send custom message after execution
+        if writer:
+            writer({
+                "message": f"✅ Architecture planning completed ({mode} mode).",
+                "node": "architect",
+                "status": "completed",
+            })
         
         # Update state with results (persistence handled by orchestrator)
         return {
