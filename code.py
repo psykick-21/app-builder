@@ -1,5 +1,6 @@
 import json
 from tqdm import tqdm
+import os
 from src.ai.graphs import run_code_agents
 
 
@@ -17,7 +18,7 @@ NODE_MESSAGES = {
 
 if __name__ == "__main__":
     # Load spec planner responses (which contain intent, architecture, and specs)
-    with open("temp/test_data/spec_planner_responses.json", "r") as f:
+    with open("results/spec_planner_responses.json", "r") as f:
         spec_planner_responses = json.load(f)
 
     # Process only the first test use case
@@ -65,12 +66,13 @@ if __name__ == "__main__":
         "root_dir": final_state.get("root_dir") if final_state else None,
     }
     
-    with open("temp/test_data/code_agents_results.json", "w") as f:
+    os.makedirs("results", exist_ok=True)
+    with open("results/code_agents_results.json", "w") as f:
         json.dump([result], f, indent=4, default=str)
     
     # Print summary
     print(f"\n✓ Processed first test use case")
-    print(f"Results saved to: temp/test_data/code_agents_results.json")
+    print(f"Results saved to: results/code_agents_results.json")
     
     # Print run instructions
     if final_state and final_state.get("root_dir"):

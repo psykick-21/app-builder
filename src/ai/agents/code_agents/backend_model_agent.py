@@ -178,7 +178,7 @@ if __name__ == "__main__":
     import json
     
     # Load test data
-    with open("temp/test_data/spec_planner_responses.json", "r") as f:
+    with open("results/spec_planner_responses.json", "r") as f:
         test_data = json.load(f)
     
     # Initialize agent
@@ -241,8 +241,9 @@ if __name__ == "__main__":
             continue
     
     # Save all results
-    with open("temp/test_data/backend_model_agent_result.json", "w") as f:
+    os.makedirs("results", exist_ok=True)
+    with open("results/backend_model_agent_result.json", "w") as f:
         json.dump(all_results, f, indent=4)
     
     print(f"\nCompleted processing {len(all_results)}/{len(test_data)} test cases")
-    print(f"Results saved to temp/test_data/backend_model_agent_result.json")
+    print(f"Results saved to results/backend_model_agent_result.json")

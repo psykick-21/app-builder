@@ -1,9 +1,4 @@
 system_config = {
-    # "intent_interpreter": {
-    #     "provider": "ollama",
-    #     "model": "gpt-oss:20b",
-    #     "additional_kwargs": {},
-    # },
     "intent_interpreter": {
         "provider": "openai",
         "model": "gpt-5-mini",
@@ -11,11 +6,6 @@ system_config = {
             "reasoning_effort": "medium",
         },
     },
-    # "architect": {
-    #     "provider": "ollama",
-    #     "model": "gpt-oss:20b",
-    #     "additional_kwargs": {},
-    # },
     "architect": {
         "provider": "openai",
         "model": "gpt-5-mini",
