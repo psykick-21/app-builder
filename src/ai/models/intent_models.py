@@ -230,13 +230,10 @@ class IntentModel(BaseModel):
 class IntentInterpreterResponse(BaseModel):
     """Response model for Intent Interpreter agent."""
     
-    mode: Literal["CREATE", "MODIFY"] = Field(
-        description="The mode in which the interpreter operated"
-    )
     intent: IntentModel = Field(
         description="The validated intent specification"
     )
     change_summary: str = Field(
-        description="Human-readable summary of changes made (for MODIFY mode) or initial intent (for CREATE mode)"
+        description="Human-readable summary of changes made or initial intent"
     )
 

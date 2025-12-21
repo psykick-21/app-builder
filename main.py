@@ -29,7 +29,7 @@ if __name__ == "__main__":
         user_prompts = json.load(f)
 
     # Process only the first test use case
-    prompt_data = user_prompts[2]
+    prompt_data = user_prompts[0]
     raw_user_input = prompt_data.get("prompt")
     
     print("="*60)

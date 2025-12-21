@@ -103,7 +103,7 @@ class IntentInterpreterAgent:
             config: Optional runtime configuration
             
         Returns:
-            Updated state with intent, mode, and change_summary
+            Updated state with intent and change_summary
         """
         # Extract inputs from state
         raw_user_input = state.get("raw_user_input")
@@ -126,7 +126,5 @@ class IntentInterpreterAgent:
         return {
             **state,
             "intent": response.intent.model_dump(),
-            "existing_intent": response.intent.model_dump(),
-            "mode": response.mode,
             "change_summary": response.change_summary,
         }

@@ -3,6 +3,7 @@
 import uuid
 import os
 import stat
+import copy
 from typing import Dict, Any, Optional
 from pathlib import Path
 
@@ -69,6 +70,8 @@ def finalize(state: CodeAgentsState, config: Optional[RunnableConfig] = None) ->
     Creates:
     - requirements.txt: Python dependencies
     - run.sh: Startup script
+    
+    Also copies intent to existing_intent and architecture to existing_architecture.
     """
     root_dir = state.get("root_dir")
     if not root_dir:
@@ -223,7 +226,15 @@ wait $BACKEND_PID $FRONTEND_PID
     import stat
     os.chmod(run_sh_path, os.stat(run_sh_path).st_mode | stat.S_IEXEC)
 
-    return state
+    # Copy intent to existing_intent and architecture to existing_architecture
+    intent = state.get("intent")
+    architecture = state.get("architecture")
+    
+    return {
+        **state,
+        "existing_intent": copy.deepcopy(intent) if intent else None,
+        "existing_architecture": copy.deepcopy(architecture) if architecture else None,
+    }
 
 
 def create_code_agents_graph():

@@ -215,6 +215,7 @@ Your responsibility is to modify the existing intent minimally while preserving 
 - Maintain the same schema structure as the original intent
 - **CRITICAL**: Each entity must have an `id_strategy` field (defaults to "auto_increment" if not specified)
 - **CRITICAL**: DO NOT include "id" as a field in the entity's fields - it's handled by id_strategy
+- The change_summary field should contain a human-readable summary of changes made or initial intent
 
 ## CONSTRAINTS
 - Do not add features not mentioned in the feedback

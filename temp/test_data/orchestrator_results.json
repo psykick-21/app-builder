@@ -1,33 +1,23 @@
 [
     {
-        "prompt": "Create an expense tracking app. Each expense should have an amount, category, date, and optional notes. I only need this for myself, no login or multi-user support.",
+        "prompt": "Build a simple task management app. I should be able to create, view, update, and delete tasks. Each task should have a title and a description. Keep the UI very basic.",
         "intent": {
-            "app_summary": "A simple personal expense tracking app to record individual expenses with amount, category, date, and optional notes.",
+            "app_summary": "A minimal task management app to create, view, update, and delete tasks with a very basic UI.",
             "app_category": "crud_app",
             "primary_entities": [
                 {
-                    "name": "Expense",
-                    "description": "A single expense record capturing the monetary amount, category, date of the expense, and optional notes for context.",
+                    "name": "Task",
+                    "description": "A task representing a work item with a short title and a longer description.",
                     "fields": [
                         {
-                            "name": "amount",
-                            "type": "integer",
-                            "required": true
-                        },
-                        {
-                            "name": "category",
+                            "name": "title",
                             "type": "string",
                             "required": true
                         },
                         {
-                            "name": "date",
-                            "type": "date",
-                            "required": true
-                        },
-                        {
-                            "name": "notes",
+                            "name": "description",
                             "type": "string",
-                            "required": false
+                            "required": true
                         }
                     ],
                     "id_strategy": "auto_increment",
@@ -36,7 +26,7 @@
             ],
             "operations": [
                 {
-                    "entity_name": "Expense",
+                    "entity_name": "Task",
                     "operations": [
                         "create",
                         "read",
@@ -52,15 +42,18 @@
             "assumptions": [
                 "Single-user application",
                 "Local execution",
-                "Amounts are stored as integers because decimal currency precision was not specified; this implies using the smallest currency unit (e.g., cents) if needed.",
-                "Category is a free-text string by default; the user did not request predefined category lists or tagging."
+                "Tasks consist only of a title and description; no tags, due dates, priority, or attachments are included in the MVP.",
+                "UI should be very basic with simple forms and lists (no advanced styling)"
             ],
             "non_goals": [
-                "Authentication or multi-user support (explicitly excluded by the user)"
+                "User authentication or multi-user support",
+                "Attachments or file uploads",
+                "Task scheduling, reminders, or recurrence",
+                "Tags, labels, or project grouping"
             ]
         },
         "mode": "CREATE",
-        "change_summary": "Initial intent: defined a single Expense entity with amount, category, date, optional notes; CRUD operations enabled; single-user local app.",
+        "change_summary": "Converted the user's description into a structured intent: one 'Task' entity with required title and description fields, full CRUD operations, auto-increment IDs, and a basic form-and-list UI. Listed several excluded features for clarity.",
         "architecture": {
             "architecture_version": "1.0",
             "tech_stack": {
@@ -129,7 +122,7 @@
                 "spec": {
                     "models": [
                         {
-                            "name": "Expense",
+                            "name": "Task",
                             "type": "pydantic",
                             "purpose": "domain",
                             "fields": [
@@ -140,87 +133,51 @@
                                     "read_only": true
                                 },
                                 {
-                                    "name": "amount",
-                                    "type": "int",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "str",
                                     "required": true,
                                     "read_only": false
                                 },
                                 {
-                                    "name": "date",
-                                    "type": "datetime",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "notes",
+                                    "name": "description",
                                     "type": "str",
-                                    "required": false,
+                                    "required": true,
                                     "read_only": false
                                 }
                             ]
                         },
                         {
-                            "name": "ExpenseCreate",
+                            "name": "TaskCreate",
                             "type": "pydantic",
                             "purpose": "create",
                             "fields": [
                                 {
-                                    "name": "amount",
-                                    "type": "int",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "str",
                                     "required": true,
                                     "read_only": false
                                 },
                                 {
-                                    "name": "date",
-                                    "type": "datetime",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "notes",
+                                    "name": "description",
                                     "type": "str",
-                                    "required": false,
+                                    "required": true,
                                     "read_only": false
                                 }
                             ]
                         },
                         {
-                            "name": "ExpenseUpdate",
+                            "name": "TaskUpdate",
                             "type": "pydantic",
                             "purpose": "update",
                             "fields": [
                                 {
-                                    "name": "amount",
-                                    "type": "int",
-                                    "required": false,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "str",
                                     "required": false,
                                     "read_only": false
                                 },
                                 {
-                                    "name": "date",
-                                    "type": "datetime",
-                                    "required": false,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "notes",
+                                    "name": "description",
                                     "type": "str",
                                     "required": false,
                                     "read_only": false
@@ -235,8 +192,8 @@
                 "spec": {
                     "tables": [
                         {
-                            "entity": "Expense",
-                            "table_name": "expenses",
+                            "entity": "Task",
+                            "table_name": "tasks",
                             "columns": [
                                 {
                                     "name": "id",
@@ -246,31 +203,17 @@
                                     "generation": "auto_increment"
                                 },
                                 {
-                                    "name": "amount",
-                                    "type": "INTEGER",
-                                    "primary_key": false,
-                                    "nullable": false,
-                                    "generation": null
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "TEXT",
                                     "primary_key": false,
                                     "nullable": false,
                                     "generation": null
                                 },
                                 {
-                                    "name": "date",
+                                    "name": "description",
                                     "type": "TEXT",
                                     "primary_key": false,
                                     "nullable": false,
-                                    "generation": null
-                                },
-                                {
-                                    "name": "notes",
-                                    "type": "TEXT",
-                                    "primary_key": false,
-                                    "nullable": true,
                                     "generation": null
                                 }
                             ]
@@ -278,41 +221,41 @@
                     ],
                     "repositories": [
                         {
-                            "entity": "Expense",
+                            "entity": "Task",
                             "methods": [
                                 {
-                                    "name": "create_expense",
+                                    "name": "create_task",
                                     "operation": "create",
                                     "inputs": [
-                                        "Expense"
+                                        "TaskCreate"
                                     ],
-                                    "returns": "Expense"
+                                    "returns": "Task"
                                 },
                                 {
-                                    "name": "get_expense_by_id",
+                                    "name": "get_task_by_id",
                                     "operation": "read",
                                     "inputs": [
                                         "int"
                                     ],
-                                    "returns": "Optional[Expense]"
+                                    "returns": "Optional[Task]"
                                 },
                                 {
-                                    "name": "list_expenses",
+                                    "name": "list_tasks",
                                     "operation": "read",
                                     "inputs": [],
-                                    "returns": "List[Expense]"
+                                    "returns": "List[Task]"
                                 },
                                 {
-                                    "name": "update_expense",
+                                    "name": "update_task",
                                     "operation": "update",
                                     "inputs": [
                                         "int",
-                                        "ExpenseUpdate"
+                                        "TaskUpdate"
                                     ],
-                                    "returns": "Expense"
+                                    "returns": "Task"
                                 },
                                 {
-                                    "name": "delete_expense",
+                                    "name": "delete_task",
                                     "operation": "delete",
                                     "inputs": [
                                         "int"
@@ -329,41 +272,41 @@
                 "spec": {
                     "services": [
                         {
-                            "entity": "Expense",
+                            "entity": "Task",
                             "functions": [
                                 {
-                                    "name": "create_expense",
+                                    "name": "create_task",
                                     "inputs": [
-                                        "ExpenseCreate"
+                                        "TaskCreate"
                                     ],
-                                    "returns": "Expense",
+                                    "returns": "Task",
                                     "operation": "create"
                                 },
                                 {
-                                    "name": "get_expense_by_id",
+                                    "name": "get_task_by_id",
                                     "inputs": [
                                         "int"
                                     ],
-                                    "returns": "Expense",
+                                    "returns": "Task",
                                     "operation": "read"
                                 },
                                 {
-                                    "name": "list_expenses",
+                                    "name": "list_tasks",
                                     "inputs": [],
-                                    "returns": "List[Expense]",
+                                    "returns": "List[Task]",
                                     "operation": "read"
                                 },
                                 {
-                                    "name": "update_expense",
+                                    "name": "update_task",
                                     "inputs": [
                                         "int",
-                                        "ExpenseUpdate"
+                                        "TaskUpdate"
                                     ],
-                                    "returns": "Expense",
+                                    "returns": "Task",
                                     "operation": "update"
                                 },
                                 {
-                                    "name": "delete_expense",
+                                    "name": "delete_task",
                                     "inputs": [
                                         "int"
                                     ],
@@ -381,41 +324,41 @@
                     "routes": [
                         {
                             "method": "POST",
-                            "path": "/expenses",
-                            "service_call": "ExpenseService.create_expense",
-                            "entity": "Expense",
-                            "request_model": "ExpenseCreate",
-                            "response_model": "Expense"
+                            "path": "/tasks",
+                            "service_call": "TaskService.create_task",
+                            "entity": "Task",
+                            "request_model": "TaskCreate",
+                            "response_model": "Task"
                         },
                         {
                             "method": "GET",
-                            "path": "/expenses",
-                            "service_call": "ExpenseService.list_expenses",
-                            "entity": "Expense",
+                            "path": "/tasks",
+                            "service_call": "TaskService.list_tasks",
+                            "entity": "Task",
                             "request_model": null,
-                            "response_model": "List[Expense]"
+                            "response_model": "List[Task]"
                         },
                         {
                             "method": "GET",
-                            "path": "/expenses/{id}",
-                            "service_call": "ExpenseService.get_expense_by_id",
-                            "entity": "Expense",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.get_task_by_id",
+                            "entity": "Task",
                             "request_model": null,
-                            "response_model": "Expense"
+                            "response_model": "Task"
                         },
                         {
                             "method": "PUT",
-                            "path": "/expenses/{id}",
-                            "service_call": "ExpenseService.update_expense",
-                            "entity": "Expense",
-                            "request_model": "ExpenseUpdate",
-                            "response_model": "Expense"
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.update_task",
+                            "entity": "Task",
+                            "request_model": "TaskUpdate",
+                            "response_model": "Task"
                         },
                         {
                             "method": "DELETE",
-                            "path": "/expenses/{id}",
-                            "service_call": "ExpenseService.delete_expense",
-                            "entity": "Expense",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.delete_task",
+                            "entity": "Task",
                             "request_model": null,
                             "response_model": "None"
                         }
@@ -427,10 +370,10 @@
                 "spec": {
                     "app_type": "fastapi",
                     "routers": [
-                        "backend.routes.expense"
+                        "backend.routes.task_routes"
                     ],
                     "middleware": [
-                        "fastapi.middleware.cors.CORSMiddleware"
+                        "CORSMiddleware (allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])"
                     ]
                 }
             },
@@ -439,7 +382,7 @@
                 "spec": {
                     "pages": [
                         {
-                            "entity": "Expense",
+                            "entity": "Task",
                             "views": [
                                 "list",
                                 "create",
@@ -451,42 +394,38 @@
                                 {
                                     "view_type": "create",
                                     "fields": [
-                                        "amount",
-                                        "category",
-                                        "date",
-                                        "notes"
+                                        "title",
+                                        "description"
                                     ]
                                 },
                                 {
                                     "view_type": "edit",
                                     "fields": [
-                                        "amount",
-                                        "category",
-                                        "date",
-                                        "notes"
+                                        "title",
+                                        "description"
                                     ]
                                 }
                             ],
                             "api_endpoints": [
                                 {
                                     "method": "GET",
-                                    "path": "/expenses"
+                                    "path": "/tasks"
                                 },
                                 {
                                     "method": "POST",
-                                    "path": "/expenses"
+                                    "path": "/tasks"
                                 },
                                 {
                                     "method": "GET",
-                                    "path": "/expenses/{id}"
+                                    "path": "/tasks/{id}"
                                 },
                                 {
                                     "method": "PUT",
-                                    "path": "/expenses/{id}"
+                                    "path": "/tasks/{id}"
                                 },
                                 {
                                     "method": "DELETE",
-                                    "path": "/expenses/{id}"
+                                    "path": "/tasks/{id}"
                                 }
                             ]
                         }
@@ -500,7 +439,7 @@
                 "spec": {
                     "models": [
                         {
-                            "name": "Expense",
+                            "name": "Task",
                             "type": "pydantic",
                             "purpose": "domain",
                             "fields": [
@@ -511,87 +450,51 @@
                                     "read_only": true
                                 },
                                 {
-                                    "name": "amount",
-                                    "type": "int",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "str",
                                     "required": true,
                                     "read_only": false
                                 },
                                 {
-                                    "name": "date",
-                                    "type": "datetime",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "notes",
+                                    "name": "description",
                                     "type": "str",
-                                    "required": false,
+                                    "required": true,
                                     "read_only": false
                                 }
                             ]
                         },
                         {
-                            "name": "ExpenseCreate",
+                            "name": "TaskCreate",
                             "type": "pydantic",
                             "purpose": "create",
                             "fields": [
                                 {
-                                    "name": "amount",
-                                    "type": "int",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "str",
                                     "required": true,
                                     "read_only": false
                                 },
                                 {
-                                    "name": "date",
-                                    "type": "datetime",
-                                    "required": true,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "notes",
+                                    "name": "description",
                                     "type": "str",
-                                    "required": false,
+                                    "required": true,
                                     "read_only": false
                                 }
                             ]
                         },
                         {
-                            "name": "ExpenseUpdate",
+                            "name": "TaskUpdate",
                             "type": "pydantic",
                             "purpose": "update",
                             "fields": [
                                 {
-                                    "name": "amount",
-                                    "type": "int",
-                                    "required": false,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "str",
                                     "required": false,
                                     "read_only": false
                                 },
                                 {
-                                    "name": "date",
-                                    "type": "datetime",
-                                    "required": false,
-                                    "read_only": false
-                                },
-                                {
-                                    "name": "notes",
+                                    "name": "description",
                                     "type": "str",
                                     "required": false,
                                     "read_only": false
@@ -602,17 +505,17 @@
                 },
                 "manifest_files": [
                     {
-                        "file_path": "backend/models/expense.py",
+                        "file_path": "backend/models/task.py",
                         "imports": [],
                         "exports": [
-                            "Expense",
-                            "ExpenseCreate",
-                            "ExpenseUpdate"
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate"
                         ],
                         "dependencies": [
                             "pydantic"
                         ],
-                        "summary": "Pydantic models for Expense entity. Defines three classes: Expense (domain model with all fields including id), ExpenseCreate (input model for creating expenses; excludes id; extra fields forbidden), and ExpenseUpdate (input model for partial updates; all fields optional; extra fields forbidden). Key fields: id (int, required in domain), amount (int, required), category (str, required), date (datetime, required), notes (Optional[str], optional)."
+                        "summary": "Pydantic models for Task entity. Defines three classes: Task (domain model with all fields including id:int, title:str, description:str), TaskCreate (input model for creating tasks with title and description required; model_config forbids extra fields), and TaskUpdate (input model for partial updates with optional title and description; model_config forbids extra fields). All fields use Field(...) with descriptive text; id is present only on the domain model per spec."
                     }
                 ]
             },
@@ -621,8 +524,8 @@
                 "spec": {
                     "tables": [
                         {
-                            "entity": "Expense",
-                            "table_name": "expenses",
+                            "entity": "Task",
+                            "table_name": "tasks",
                             "columns": [
                                 {
                                     "name": "id",
@@ -632,31 +535,17 @@
                                     "generation": "auto_increment"
                                 },
                                 {
-                                    "name": "amount",
-                                    "type": "INTEGER",
-                                    "primary_key": false,
-                                    "nullable": false,
-                                    "generation": null
-                                },
-                                {
-                                    "name": "category",
+                                    "name": "title",
                                     "type": "TEXT",
                                     "primary_key": false,
                                     "nullable": false,
                                     "generation": null
                                 },
                                 {
-                                    "name": "date",
+                                    "name": "description",
                                     "type": "TEXT",
                                     "primary_key": false,
                                     "nullable": false,
-                                    "generation": null
-                                },
-                                {
-                                    "name": "notes",
-                                    "type": "TEXT",
-                                    "primary_key": false,
-                                    "nullable": true,
                                     "generation": null
                                 }
                             ]
@@ -664,41 +553,41 @@
                     ],
                     "repositories": [
                         {
-                            "entity": "Expense",
+                            "entity": "Task",
                             "methods": [
                                 {
-                                    "name": "create_expense",
+                                    "name": "create_task",
                                     "operation": "create",
                                     "inputs": [
-                                        "Expense"
+                                        "TaskCreate"
                                     ],
-                                    "returns": "Expense"
+                                    "returns": "Task"
                                 },
                                 {
-                                    "name": "get_expense_by_id",
+                                    "name": "get_task_by_id",
                                     "operation": "read",
                                     "inputs": [
                                         "int"
                                     ],
-                                    "returns": "Optional[Expense]"
+                                    "returns": "Optional[Task]"
                                 },
                                 {
-                                    "name": "list_expenses",
+                                    "name": "list_tasks",
                                     "operation": "read",
                                     "inputs": [],
-                                    "returns": "List[Expense]"
+                                    "returns": "List[Task]"
                                 },
                                 {
-                                    "name": "update_expense",
+                                    "name": "update_task",
                                     "operation": "update",
                                     "inputs": [
                                         "int",
-                                        "ExpenseUpdate"
+                                        "TaskUpdate"
                                     ],
-                                    "returns": "Expense"
+                                    "returns": "Task"
                                 },
                                 {
-                                    "name": "delete_expense",
+                                    "name": "delete_task",
                                     "operation": "delete",
                                     "inputs": [
                                         "int"
@@ -717,7 +606,7 @@
                             "init_database"
                         ],
                         "dependencies": [],
-                        "summary": "Database initialization for SQLite. Defines init_database(db_path: str = 'app.db') which creates the 'expenses' table with columns id (PK AUTOINCREMENT), amount (INTEGER NOT NULL), category (TEXT NOT NULL), date (TEXT NOT NULL, stores ISO 8601 datetime), and notes (TEXT, nullable). Enables PRAGMA foreign_keys and ensures connection cleanup with try/finally."
+                        "summary": "Database initialization script for SQLite. Defines init_database(db_path: str = 'app.db') which creates the 'tasks' table with columns: id (INTEGER PRIMARY KEY AUTOINCREMENT), title (TEXT NOT NULL), description (TEXT NOT NULL). Enables foreign keys and ensures parent directory for the DB file exists. Uses PRAGMA foreign_keys = ON."
                     },
                     {
                         "file_path": "backend/db/connection.py",
@@ -726,20 +615,20 @@
                             "get_db_connection"
                         ],
                         "dependencies": [],
-                        "summary": "Database connection utility. Provides get_db_connection(db_path: str = 'app.db') -> sqlite3.Connection with conn.row_factory set to sqlite3.Row and PRAGMA foreign_keys = ON. Connections must be closed by caller (use try/finally)."
+                        "summary": "Connection utility for SQLite. Defines get_db_connection(db_path: str = 'app.db') which returns a sqlite3.Connection with row_factory set to sqlite3.Row and PRAGMA foreign_keys = ON enabled. Ensures parent directory for DB file exists."
                     },
                     {
-                        "file_path": "backend/db/expense_repository.py",
+                        "file_path": "backend/db/task_repository.py",
                         "imports": [
-                            "Expense",
-                            "ExpenseCreate",
-                            "ExpenseUpdate"
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate"
                         ],
                         "exports": [
-                            "ExpenseRepository"
+                            "TaskRepository"
                         ],
                         "dependencies": [],
-                        "summary": "SQLite repository for Expense entity data access. Defines ExpenseRepository with methods: create_expense(ExpenseCreate) -> Expense, get_expense_by_id(int) -> Optional[Expense], list_expenses() -> List[Expense], update_expense(int, ExpenseUpdate) -> Expense, delete_expense(int) -> None. Uses backend.db.connection.get_db_connection, stores datetime fields as ISO 8601 TEXT, and maps rows to backend.models.expense Pydantic models. All DB operations use parameterized queries and ensure connections are closed with try/finally."
+                        "summary": "SQLite repository for Task entity data access. Defines TaskRepository with CRUD methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Uses parameterized queries, explicit mapping from sqlite3.Row to Pydantic models, and try/finally blocks to ensure connections are closed."
                     }
                 ]
             },
@@ -748,41 +637,41 @@
                 "spec": {
                     "services": [
                         {
-                            "entity": "Expense",
+                            "entity": "Task",
                             "functions": [
                                 {
-                                    "name": "create_expense",
+                                    "name": "create_task",
                                     "inputs": [
-                                        "ExpenseCreate"
+                                        "TaskCreate"
                                     ],
-                                    "returns": "Expense",
+                                    "returns": "Task",
                                     "operation": "create"
                                 },
                                 {
-                                    "name": "get_expense_by_id",
+                                    "name": "get_task_by_id",
                                     "inputs": [
                                         "int"
                                     ],
-                                    "returns": "Expense",
+                                    "returns": "Task",
                                     "operation": "read"
                                 },
                                 {
-                                    "name": "list_expenses",
+                                    "name": "list_tasks",
                                     "inputs": [],
-                                    "returns": "List[Expense]",
+                                    "returns": "List[Task]",
                                     "operation": "read"
                                 },
                                 {
-                                    "name": "update_expense",
+                                    "name": "update_task",
                                     "inputs": [
                                         "int",
-                                        "ExpenseUpdate"
+                                        "TaskUpdate"
                                     ],
-                                    "returns": "Expense",
+                                    "returns": "Task",
                                     "operation": "update"
                                 },
                                 {
-                                    "name": "delete_expense",
+                                    "name": "delete_task",
                                     "inputs": [
                                         "int"
                                     ],
@@ -795,18 +684,18 @@
                 },
                 "manifest_files": [
                     {
-                        "file_path": "backend/services/expense_service.py",
+                        "file_path": "backend/services/task_service.py",
                         "imports": [
-                            "Expense",
-                            "ExpenseCreate",
-                            "ExpenseUpdate",
-                            "ExpenseRepository"
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate",
+                            "TaskRepository"
                         ],
                         "exports": [
-                            "ExpenseService"
+                            "TaskService"
                         ],
                         "dependencies": [],
-                        "summary": "Business logic service for Expense entity CRUD operations. Defines ExpenseService with methods: create_expense(ExpenseCreate) -> Expense, get_expense_by_id(int) -> Optional[Expense], list_expenses() -> List[Expense], update_expense(int, ExpenseUpdate) -> Optional[Expense], delete_expense(int) -> None. Delegates persistence operations to ExpenseRepository from backend.db.expense_repository."
+                        "summary": "Business logic service for Task entity CRUD operations. Defines TaskService with methods: create_task(TaskCreate) -> Task, get_task_by_id(int) -> Optional[Task], list_tasks() -> List[Task], update_task(int, TaskUpdate) -> Task, delete_task(int) -> None. Delegates all data persistence to TaskRepository."
                     }
                 ]
             },
@@ -816,41 +705,41 @@
                     "routes": [
                         {
                             "method": "POST",
-                            "path": "/expenses",
-                            "service_call": "ExpenseService.create_expense",
-                            "entity": "Expense",
-                            "request_model": "ExpenseCreate",
-                            "response_model": "Expense"
+                            "path": "/tasks",
+                            "service_call": "TaskService.create_task",
+                            "entity": "Task",
+                            "request_model": "TaskCreate",
+                            "response_model": "Task"
                         },
                         {
                             "method": "GET",
-                            "path": "/expenses",
-                            "service_call": "ExpenseService.list_expenses",
-                            "entity": "Expense",
+                            "path": "/tasks",
+                            "service_call": "TaskService.list_tasks",
+                            "entity": "Task",
                             "request_model": null,
-                            "response_model": "List[Expense]"
+                            "response_model": "List[Task]"
                         },
                         {
                             "method": "GET",
-                            "path": "/expenses/{id}",
-                            "service_call": "ExpenseService.get_expense_by_id",
-                            "entity": "Expense",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.get_task_by_id",
+                            "entity": "Task",
                             "request_model": null,
-                            "response_model": "Expense"
+                            "response_model": "Task"
                         },
                         {
                             "method": "PUT",
-                            "path": "/expenses/{id}",
-                            "service_call": "ExpenseService.update_expense",
-                            "entity": "Expense",
-                            "request_model": "ExpenseUpdate",
-                            "response_model": "Expense"
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.update_task",
+                            "entity": "Task",
+                            "request_model": "TaskUpdate",
+                            "response_model": "Task"
                         },
                         {
                             "method": "DELETE",
-                            "path": "/expenses/{id}",
-                            "service_call": "ExpenseService.delete_expense",
-                            "entity": "Expense",
+                            "path": "/tasks/{id}",
+                            "service_call": "TaskService.delete_task",
+                            "entity": "Task",
                             "request_model": null,
                             "response_model": "None"
                         }
@@ -858,12 +747,12 @@
                 },
                 "manifest_files": [
                     {
-                        "file_path": "backend/routes/expense_routes.py",
+                        "file_path": "backend/routes/task_routes.py",
                         "imports": [
-                            "Expense",
-                            "ExpenseCreate",
-                            "ExpenseUpdate",
-                            "ExpenseService"
+                            "Task",
+                            "TaskCreate",
+                            "TaskUpdate",
+                            "TaskService"
                         ],
                         "exports": [
                             "router"
@@ -871,7 +760,7 @@
                         "dependencies": [
                             "fastapi"
                         ],
-                        "summary": "FastAPI router for Expense entity. Exposes endpoints under prefix /expenses with CRUD routes: POST / (create_expense), GET / (list_expenses), GET /{id} (get_expense), PUT /{id} (update_expense), DELETE /{id} (delete_expense). Integrates with backend.services.expense_service.ExpenseService (initialized as expense_service) and uses Pydantic models from backend.models.expense (Expense, ExpenseCreate, ExpenseUpdate) for request validation and response models."
+                        "summary": "FastAPI router for Task entity. Exposes endpoints under prefix '/tasks' with tag 'tasks'. Routes: POST /tasks -> create_task (uses TaskCreate, returns Task); GET /tasks -> list_tasks (returns List[Task]); GET /tasks/{id} -> get_task (returns Task, 404 if not found); PUT /tasks/{id} -> update_task (accepts TaskUpdate, returns Task, 404 if not found); DELETE /tasks/{id} -> delete_task (204 on success, 404 if not found). Integrates with backend.services.task_service.TaskService and backend.models.task models."
                     }
                 ]
             },
@@ -880,10 +769,10 @@
                 "spec": {
                     "app_type": "fastapi",
                     "routers": [
-                        "backend.routes.expense"
+                        "backend.routes.task_routes"
                     ],
                     "middleware": [
-                        "fastapi.middleware.cors.CORSMiddleware"
+                        "CORSMiddleware (allow_origins=['*'], allow_methods=['*'], allow_headers=['*'])"
                     ]
                 },
                 "manifest_files": [
@@ -899,7 +788,7 @@
                             "fastapi",
                             "uvicorn"
                         ],
-                        "summary": "FastAPI application bootstrap. Creates a FastAPI app titled 'Expense Management API', imports and registers the router from backend.routes.expense_routes, and defines root and health endpoints. Runs the server with uvicorn on port 1234 when executed as main."
+                        "summary": "Entrypoint for the FastAPI Task Management API. Creates the FastAPI app, registers the task router from backend.routes.task_routes, and provides root and health endpoints. No custom middleware configured since none exists in manifests; warns about skipping spec-specified custom middleware and suggests using FastAPI built-in middleware like CORSMiddleware if needed."
                     }
                 ]
             },
@@ -908,7 +797,7 @@
                 "spec": {
                     "pages": [
                         {
-                            "entity": "Expense",
+                            "entity": "Task",
                             "views": [
                                 "list",
                                 "create",
@@ -920,42 +809,38 @@
                                 {
                                     "view_type": "create",
                                     "fields": [
-                                        "amount",
-                                        "category",
-                                        "date",
-                                        "notes"
+                                        "title",
+                                        "description"
                                     ]
                                 },
                                 {
                                     "view_type": "edit",
                                     "fields": [
-                                        "amount",
-                                        "category",
-                                        "date",
-                                        "notes"
+                                        "title",
+                                        "description"
                                     ]
                                 }
                             ],
                             "api_endpoints": [
                                 {
                                     "method": "GET",
-                                    "path": "/expenses"
+                                    "path": "/tasks"
                                 },
                                 {
                                     "method": "POST",
-                                    "path": "/expenses"
+                                    "path": "/tasks"
                                 },
                                 {
                                     "method": "GET",
-                                    "path": "/expenses/{id}"
+                                    "path": "/tasks/{id}"
                                 },
                                 {
                                     "method": "PUT",
-                                    "path": "/expenses/{id}"
+                                    "path": "/tasks/{id}"
                                 },
                                 {
                                     "method": "DELETE",
-                                    "path": "/expenses/{id}"
+                                    "path": "/tasks/{id}"
                                 }
                             ]
                         }
@@ -967,21 +852,21 @@
                         "imports": [],
                         "exports": [
                             "main",
-                            "list_expenses",
-                            "create_expense",
-                            "edit_expense",
-                            "detail_expense",
-                            "delete_expense"
+                            "list_tasks",
+                            "create_task",
+                            "edit_task",
+                            "view_task_detail",
+                            "delete_task"
                         ],
                         "dependencies": [
                             "streamlit",
                             "requests"
                         ],
-                        "summary": "Streamlit app for Expense entity. Implements List, Create, Edit, Detail, and Delete views. Uses backend API endpoints from backend_routes: GET /expenses, POST /expenses, GET /expenses/{id}, PUT /expenses/{id}, DELETE /expenses/{id}. Navigation via sidebar; session_state used for selected expense and page. Dates are sent as ISO datetime strings. Handles HTTP errors and connection exceptions, shows success/error feedback, and reruns after actions."
+                        "summary": "Streamlit frontend for Task entity. Implements views: list, create, edit, detail, delete. Integrates with backend API endpoints from manifests: GET /tasks, POST /tasks, GET /tasks/{id}, PUT /tasks/{id}, DELETE /tasks/{id}. Uses st.form for create/edit, st.session_state for selections, and handles HTTP errors with st.error(). Navigation is via sidebar and buttons in the list view."
                     }
                 ]
             }
         ],
-        "root_dir": "generated_apps/7c48d9b3-a94f-445c-ad32-cc5802969280"
+        "root_dir": "generated_apps/004d03ad-e176-4130-a2a9-ddd7f782f913"
     }
 ]
