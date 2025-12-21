@@ -416,9 +416,9 @@ Evaluate if the existing architecture still satisfies this updated intent.
 **Component Analysis:**
 
 1. **Check what components the updated intent requires:**
-   - Does it need backend? (Was: {existing has backend}, Now: {check intent})
-   - Does it need frontend? (Was: {existing has frontend}, Now: {check intent})
-   - Does it need persistence? (Was: {existing has database}, Now: {check intent})
+   - Does it need backend? (Was: {{existing has backend}}, Now: {{check intent}})
+   - Does it need frontend? (Was: {{existing has frontend}}, Now: {{check intent}})
+   - Does it need persistence? (Was: {{existing has database}}, Now: {{check intent}})
 
 2. **Compare against existing architecture:**
    - If intent adds a NEW component (e.g., "now add a UI"):

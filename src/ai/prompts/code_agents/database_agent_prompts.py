@@ -23,9 +23,24 @@ Generate SQLite database setup code and repository classes based on the database
 ```python
 import sqlite3
 from pathlib import Path
+import os
 
 def init_database(db_path: str = "app.db"):
-    \"\"\"Initialize SQLite database and create tables.\"\"\"
+    \"\"\"Initialize SQLite database and create tables.
+    
+    If the database file already exists, it will be deleted and recreated
+    to ensure a fresh start with the current schema.
+    \"\"\"
+    # Delete existing database if it exists (for fresh initialization)
+    if os.path.exists(db_path):
+        os.remove(db_path)
+        print(f"Removed existing database: {{db_path}}")
+    
+    # Ensure the directory exists
+    db_dir = Path(db_path).parent
+    if db_dir and not db_dir.exists():
+        db_dir.mkdir(parents=True, exist_ok=True)
+    
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
     
@@ -34,7 +49,7 @@ def init_database(db_path: str = "app.db"):
     
     # Create tables
     cursor.execute('''
-        CREATE TABLE IF NOT EXISTS tasks (
+        CREATE TABLE tasks (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             description TEXT,
@@ -45,6 +60,7 @@ def init_database(db_path: str = "app.db"):
     
     conn.commit()
     conn.close()
+    print(f"Database initialized: {{db_path}}")
 ```
 
 ### Connection Utility (connection.py)
@@ -120,11 +136,18 @@ class TaskRepository:
 - **IMPORTANT**: For datetime/timestamp fields, use TEXT type and store as ISO 8601 format (YYYY-MM-DDTHH:MM:SS.ffffff)
 - When reading datetime TEXT fields, convert them to datetime objects if the model expects datetime types
 
+**Database Initialization:**
+- **CRITICAL**: Always check if the database file exists before initializing
+- If the database file exists, delete it using `os.remove(db_path)` to ensure a fresh start
+- This ensures that schema changes are properly applied when the app is regenerated
+- After deleting (if it existed), create the database fresh with the new schema
+- Ensure the database directory exists before creating the file
+
 **Table Creation:**
 - Use exact table names from spec
 - Use exact column names from spec
 - Handle PRIMARY KEY, AUTOINCREMENT, NOT NULL, DEFAULT as specified
-- Use CREATE TABLE IF NOT EXISTS for idempotency
+- Use CREATE TABLE (not CREATE TABLE IF NOT EXISTS) since we're creating a fresh database
 - Enable foreign key constraints with PRAGMA foreign_keys = ON in both init_database() and get_db_connection()
 - Define foreign key relationships using FOREIGN KEY (column) REFERENCES other_table(column) when relationships exist
 
