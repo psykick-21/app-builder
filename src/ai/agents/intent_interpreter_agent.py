@@ -126,6 +126,7 @@ class IntentInterpreterAgent:
         return {
             **state,
             "intent": response.intent.model_dump(),
+            "existing_intent": response.intent.model_dump(),
             "mode": response.mode,
             "change_summary": response.change_summary,
         }

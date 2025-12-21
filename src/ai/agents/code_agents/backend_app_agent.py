@@ -112,22 +112,22 @@ class BackendAppAgent:
             manifests=manifests,
         )
         
-        # extraction paths
-        configurable = config.get("configurable", {})
-        thread_id = configurable.get("thread_id")
-        app_root_path = Path("generated_apps") / thread_id
+        # Get root_dir from state
+        root_dir = state.get("root_dir")
+        if not root_dir:
+            raise ValueError("root_dir is required in state")
 
-        file_root_path = os.path.join(app_root_path, current_layer_path)
+        file_root_path = root_dir / current_layer_path
         # If the layer path includes a filename (e.g., backend/main.py), extract just the directory
-        if file_root_path.endswith('.py'):
-            file_root_path = os.path.dirname(file_root_path)
-        os.makedirs(file_root_path, exist_ok=True)
+        if file_root_path.suffix == '.py':
+            file_root_path = file_root_path.parent
+        file_root_path.mkdir(parents=True, exist_ok=True)
 
         # save files to filesystem
         for file in result.files:
             # Extract just the filename in case LLM returns a path
             filename = os.path.basename(file.filename)
-            with open(os.path.join(file_root_path, filename), "w") as f:
+            with open(file_root_path / filename, "w") as f:
                 f.write(file.code_content)
 
         manifest_files = []
